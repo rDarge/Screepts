@@ -608,7 +608,8 @@ module.exports.loop = function () {
                         role: 'remote_hauler_d',
                         count: 1,
                         stats: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
-                                CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
+                                CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
+                                MOVE],
                         pickupBehavior: [pickupEnergy,pickupStructure],
                         depositBehavior: [depositStructure],
                         memory: {
