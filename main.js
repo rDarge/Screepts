@@ -2,17 +2,8 @@
 
 
 //Old roles
-var harvester = require('role.harvester');
-var upgrader = require('role.upgrader');
-var builder = require('role.builder');
-// var chainMember = require('role.chainMember');
-var dedicatedHarvester = require('role.dedicatedHarvester');
-var hauler = require('role.hauler');
 var agent = require('role.agent');
-var decoy = require('role.decoy');
 var claimer = require('role.claimer');
-var rejuvenate = require('role.rejuvenate');
-var explorer = require('role.explorer');
 var obsolete = require('role.obsolete');
 
 //new atomic behaviors
@@ -247,12 +238,6 @@ module.exports.loop = function () {
                         memory: {
                             target: "explore"
                         }
-                    },{
-                        role: 'decoy',
-                        count: 0,
-                        stats: [TOUGH,MOVE,MOVE,MOVE],
-                        action: decoy,
-                        free: true
                     },{
                         role: 'geologist',
                         count: Game.getObjectById("579da066136f091c3105d014").store[RESOURCE_ZYNTHIUM] < 150000 ? 1 : 0,
