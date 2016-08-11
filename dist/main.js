@@ -591,7 +591,7 @@ module.exports.loop = function () {
                         }
                     },{
                         role: 'remote_hauler_d',
-                        count: 1,
+                        count: 2,
                         stats: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
                                 CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
                                 MOVE],
@@ -805,18 +805,18 @@ module.exports.loop = function () {
                         }
                     },{
                         role: 'remote_repairer_a',
-                        count: 0,
+                        count: 1,
                         stats: [CARRY,CARRY,CARRY,CARRY,WORK,MOVE,MOVE,MOVE],
                         pickupBehavior: [pickupEnergy,pickupStructure],
                         depositBehavior: [depositRepair, depositConstruction, depositStructure],
                         memory: {
                             pickupStructure: "579db3b82ce4a90f7cf6b51f",
-                            depositStructure: "57a16e89b3af09680f7312b2",
+                            depositStructure: "57ab15daddb24c075a4cced8",
                             repairTargetTypes: "road"
                         }
                     },{
                         role: 'claimer_a',
-                        count: 0,
+                        count: 1,
                         respawnTime: 100,
                         stats: [CLAIM,MOVE,MOVE],
                         action: claimer,
