@@ -9,6 +9,12 @@
 
 var depositConstruction = {
     deposit: function(creep) {
+        //Short-circuit if we don't have any parts
+        if(creep.getActiveBodyparts(WORK) == 0) {
+            return false; 
+        }
+
+        //Otherwise do work!
         var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
         if(targets.length > 0) {
             // console.log("There are " + targets.length + " things to build in room "+creep.room.name+"!");
