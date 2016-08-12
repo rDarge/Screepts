@@ -1,10 +1,5 @@
-
-
 //Configuration imports
 var roomConfigurations = require('config.rooms');
-
-
-
 
 //Utilities
 var energyManager = require('util.energyManager');

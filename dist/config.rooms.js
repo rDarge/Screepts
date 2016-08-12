@@ -25,6 +25,21 @@ var zLab = Game.getObjectById("57a404759c6ec19f1b0669b1")
 var oLab = Game.getObjectById("57a4d1c69f073e5c05e22c6c")
 var zoLab = Game.getObjectById("57a59a89adf97d367f548e7e")
 
+//TODO THIS
+
+// var config = {
+// 	rooms: [
+// 		{
+//             name: "Home Base",
+//             room: Game.rooms.W11N47,
+//             spawn: Game.spawns.Spawn1,
+//             groups: {
+//             	harvester_1: getHarvesterGroup("577b93560f9d51615fa4801a",""); //returns array of dedicated harvester and hauler for that source
+// 				harvester_2: getHarvesterGroup("577b93560f9d51615fa48019"); //returns array of dedicated harvester and hauler for that source
+//             }
+// 	]
+// }
+
 
 var config = {
 
@@ -71,7 +86,9 @@ var config = {
                 },{
                     role: 'extraHauler',
                     count: 1,
-                    stats: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE],
+                    stats: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                    		CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                    		MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
                     pickupBehavior: pickupStructure,
                     depositBehavior: [depositSpawn, depositStructure],
                     memory: {
@@ -105,8 +122,9 @@ var config = {
                 },{
                     role: 'wallBreaker',
                     count: 0,
-                    stats: [WORK,MOVE,WORK,MOVE,WORK,MOVE,WORK,MOVE,WORK,MOVE,
-                            WORK,MOVE,WORK,MOVE,WORK,MOVE,WORK,MOVE,WORK,MOVE], //1500, 500 destruction per tick, 2000 health
+                    stats: [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
+                            WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
+                            MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE], //2500, 500 destruction per tick, 2000 health
                     pickupBehavior: warWallBreaker,
                 },{
                     role: 'murderer',
@@ -122,7 +140,7 @@ var config = {
                     depositBehavior: [depositRepair],
                     memory: {
                         pickupStructure: "579468d58e446dcf073c0c0d",
-                        repairTargetTypes: "rampart,constructedWall"
+                        repairTargetTypes: "constructedWall"
                     }
                 },{
                     role: 'roadFixer',
@@ -132,7 +150,7 @@ var config = {
                     depositBehavior: [depositRepair],
                     memory: {
                         pickupStructure: "579468d58e446dcf073c0c0d",
-                        repairTargetTypes: "container,road"
+                        repairTargetTypes: "rampart,container,road"
                     }
                 },{
                     role: 'miner',
@@ -179,10 +197,10 @@ var config = {
                     count: 1,
                     stats: [WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
                     pickupBehavior: [pickupEnergy,pickupStructure],
-                    depositBehavior: [depositStructure, depositConstruction],
+                    depositBehavior: [depositConstruction, depositStructure],
                     memory: {
                         pickupStructure: "579468d58e446dcf073c0c0d",
-                        depositStructure: "57904b0ec9d7b23451cc8204"
+                        depositStructure: "57904b0ec9d7b23451cc8204,5795b5033782a0b015dde292"
                     }
                 },{
                     role: 'agent',
@@ -253,26 +271,13 @@ var config = {
                     count: 1,
                     stats: [CARRY,CARRY, WORK, WORK, MOVE, MOVE, MOVE, MOVE],
                     pickupBehavior: [pickupEnergy,pickupStructure],
-                    depositBehavior: [depositRepair, depositController],
+                    depositBehavior: [depositRepair],
                     memory: {
                         // pickupSource: "577b93530f9d51615fa47fd8",
                         // pickupEnergy: "57a1403939ba5cb4136bf49c",
-                        pickupStructure: "579cf3040a5eed39634cc3da",
+                        pickupStructure: "579e7d7ac8c8d3b46f3c7ede",
                         pickupRoom: "W12N47",
                         depositRoom: "W12N47",
-                        repairTargetTypes: "road"
-                    }
-                },{
-                    role: 'explorer-builder',
-                    count: 0,
-                    stats: [CARRY,CARRY, WORK, WORK, MOVE, MOVE, MOVE, MOVE],
-                    pickupBehavior: [pickupEnergy,pickupStructure],
-                    depositBehavior: [depositConstruction, depositRepair, depositController],
-                    memory: {
-                        // pickupSource: "577b93530f9d51615fa47fd7",
-                        // pickupStructure: "579e7d7ac8c8d3b46f3c7ede",
-                        pickupStructure: "579cf3040a5eed39634cc3da",
-                        // pickupEnergy: "579e01033bd4b218529f6651",
                         repairTargetTypes: "road"
                     }
                 },{
@@ -321,7 +326,7 @@ var config = {
                     }
                 },{
                     role: 'upgrader',
-                    count: 2,
+                    count: 0,
                     stats: [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
                             WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
                             CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
@@ -345,6 +350,16 @@ var config = {
             link: "579c95c256b4053c0f1736c7",
             creeps: [
                 {
+                    role: 'backupHarvester',
+                    count: 1,
+                    stats: [WORK,CARRY,MOVE],
+                    pickupBehavior: [pickupStructure,pickupSource],
+                    depositBehavior: [depositSpawn],
+                    memory: {
+                        pickupSource: "577b93510f9d51615fa47f99",
+                        pickupStructure: "579b0acaf2aeb6f4028edc20",
+                    }
+                },{
                     role: 'harvester',  
                     count: 0,
                     stats: [WORK,CARRY,MOVE],
@@ -364,7 +379,7 @@ var config = {
                     role: 'hauler',
                     count: 1,
                     stats: [CARRY,CARRY,CARRY,CARRY,MOVE,MOVE],
-                    pickupBehavior: [pickupEnergy,pickupStructure],
+                    pickupBehavior: [pickupStructure],
                     depositBehavior: [depositSpawn, depositStructure],
                     memory: {
                         pickupStructure: "579b14f83bd4b218529d528f",
@@ -394,7 +409,7 @@ var config = {
                 },{
                     role: 'linkTender',
                     count: 1,
-                    stats: [CARRY,CARRY,MOVE],
+                    stats: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE],
                     pickupBehavior: [pickupEnergy,pickupStructure],
                     depositBehavior: [depositStructure],
                     memory:{
@@ -423,21 +438,21 @@ var config = {
                     }
                 },{
                     role: 'e_hauler',
-                    count: Game.getObjectById("57a2df5620d65c935737496e").store[RESOURCE_ENERGY] < 5000 && _.sum(Game.getObjectById("57a2df5620d65c935737496e").store) < 300000 ? 1 : 0,//zoLab.energy < 2000 ? 1 : 0,
+                    count: 0,//Game.getObjectById("57a2df5620d65c935737496e").store[RESOURCE_ENERGY] < 100000 && _.sum(Game.getObjectById("57a2df5620d65c935737496e").store) < 300000 ? 1 : 0,//zoLab.energy < 2000 ? 1 : 0,
                     stats: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
                             MOVE,MOVE,MOVE,MOVE,MOVE],
                     pickupBehavior: pickupStructure,
                     depositBehavior: [depositStructure],
                     memory: {
-                        // pickupStructure: "579b0acaf2aeb6f4028edc20",
-                        // depositStructure: "57a2df5620d65c935737496e",
+                        pickupStructure: "579b0acaf2aeb6f4028edc20",
+                        depositStructure: "57a2df5620d65c935737496e",
                         // depositStructure: "579b0acaf2aeb6f4028edc20",
                         // pickupStructure: "57a2df5620d65c935737496e",
                         resourceType: RESOURCE_ENERGY,
                     }
                 },{
                     role: 'o_hauler',
-                    count: Game.getObjectById("57a2df5620d65c935737496e").store[RESOURCE_OXYGEN] > 100000 ? 1 : 0,//zoLab.energy < 2000 ? 1 : 0,
+                    count: Game.getObjectById("57a2df5620d65c935737496e").store[RESOURCE_OXYGEN] > 101000 ? 1 : 0,//zoLab.energy < 2000 ? 1 : 0,
                     stats: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
                             MOVE,MOVE,MOVE,MOVE,MOVE],
                     pickupBehavior: pickupStructure,
@@ -491,14 +506,14 @@ var config = {
                     role: 'builder',
                     count: 1,
                     stats: [CARRY,CARRY,CARRY,WORK,WORK,WORK,MOVE,MOVE,MOVE],
-                    pickupBehavior: [pickupEnergy,pickupStructure],
+                    pickupBehavior: [pickupStructure],
                     depositBehavior: [depositConstruction, depositSpawn, depositController],
                     memory: {
                         pickupStructure: "579b0acaf2aeb6f4028edc20",
                     }
                 },{
                     role: 'geologist',
-                    count: Game.getObjectById("57a2df5620d65c935737496e").store[RESOURCE_OXYGEN] < 150000 ? 1 : 0,
+                    count: Game.getObjectById("57a2df5620d65c935737496e").store[RESOURCE_OXYGEN] < 100000 ? 1 : 0, //ADD MINERAL SOURCE CHECK
                     stats: [CARRY, WORK, WORK, WORK, WORK, WORK, MOVE, MOVE],
                     pickupBehavior: pickupSource,
                     depositBehavior: [depositStructure],
@@ -509,9 +524,9 @@ var config = {
                     }
                 },{
                     role: 'agent',
-                    count: 1,
-                    stats: [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,
-                            MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,RANGED_ATTACK,RANGED_ATTACK,HEAL],
+                    count: 0,
+                    stats: [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,ATTACK,ATTACK,ATTACK,ATTACK,
+                            MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,ATTACK,HEAL],
                     action: agent,
                     crisis: agent,
                     free: true
@@ -570,13 +585,14 @@ var config = {
                     }
                 },{
                     role: 'remote_hauler_d',
-                    count: 1,
+                    count: 2,
                     stats: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
-                            CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
-                            MOVE],
+                            CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                            MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
                     pickupBehavior: [pickupEnergy,pickupStructure],
                     depositBehavior: [depositStructure],
                     memory: {
+                    	pickupRoom: "W12N46",
                         pickupStructure: "579db3b82ce4a90f7cf6b51f",
                         depositStructure: "57a16e89b3af09680f7312b2"
                     }
@@ -636,6 +652,7 @@ var config = {
                         pickupRoom: "W14N46",
                         pickupSource: "577b934e0f9d51615fa47f44",
                         depositStructure: "579b0acaf2aeb6f4028edc20",
+                        repairRoads: true
                         // repairTargetTypes: "container,road"
                     }
                 },{
@@ -675,7 +692,7 @@ var config = {
                     }
                 },{
                     role: 'upgrader',
-                    count: 2,
+                    count: 0,
                     stats: [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
                             CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
                     pickupBehavior: pickupStructure,
@@ -783,9 +800,9 @@ var config = {
                     }
                 },{
                     role: 'remote_hauler_a',
-                    count: 2,
+                    count: 1,
                     stats: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
-                            MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
+                            WORK,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
                     pickupBehavior: [pickupEnergy],
                     depositBehavior: [depositStructure],
                     memory: {
@@ -797,11 +814,12 @@ var config = {
                     role: 'remote_repairer_a',
                     count: 1,
                     stats: [CARRY,CARRY,CARRY,CARRY,WORK,MOVE,MOVE,MOVE],
-                    pickupBehavior: [pickupEnergy,pickupStructure],
+                    pickupBehavior: [pickupEnergy],
                     depositBehavior: [depositRepair, depositConstruction, depositStructure],
                     memory: {
                         pickupStructure: "579db3b82ce4a90f7cf6b51f",
                         depositStructure: "57ab15daddb24c075a4cced8",
+                        pickupRoom: "W15N47",
                         repairTargetTypes: "road"
                     }
                 },{

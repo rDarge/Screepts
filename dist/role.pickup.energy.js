@@ -23,7 +23,8 @@ var pickupEnergy = {
             var energyId = creep.memory.pickupEnergy;
             var energy = Game.getObjectById(energyId);
         } else  {
-            energy = creep.room.find(FIND_DROPPED_ENERGY);
+            energy = creep.room.find(FIND_DROPPED_ENERGY, {filter: (resource) => resource.resourceType == RESOURCE_ENERGY});
+
             if(energy) {
                 energy = energy[0];
             }

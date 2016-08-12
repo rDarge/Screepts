@@ -22,6 +22,14 @@ var depositStructure = {
             targets = targetIds.map((id) => Game.getObjectById(id));
             // target = Game.getObjectById(targetId);
         }
+
+        //ABSTRACT THIS
+        if(creep.memory.repairRoads && creep.getActiveBodyparts(WORK) > 0) {
+            maybeRoad = creep.room.lookForAt(LOOK_STRUCTURES, creep.pos);
+            if(maybyeRoad.length > 0 && maybeRoad[0].structureType == 'road' && maybeRoad[0].hits < maybeRoad[0].hitsMax){
+                creep.repair(maybeRoad[0]);
+            }
+        }
         
         //Transfer type logic:
         resourceType = RESOURCE_ENERGY;

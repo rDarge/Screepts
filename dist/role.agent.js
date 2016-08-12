@@ -1,8 +1,8 @@
 var agent = { 
     
     run: function(creep) {
-        waypoint = Game.flags.trenches0;
-        target = Game.flags.trenches;
+        waypoint = Game.flags.agent;
+        target = Game.flags.agent;
         
         //See if we got to the waypoint
         if(creep.room.roomName == Game.flags.waypoint.pos.name || !waypoint){
@@ -38,7 +38,7 @@ var agent = {
             var towers = creep.room.find(FIND_HOSTILE_CREEPS);   
             //console.log(towers);
             if(towers.length > 0) {
-                if(creep.rangedAttack(towers[0]) == ERR_NOT_IN_RANGE){
+                if(creep.attack(towers[0]) == ERR_NOT_IN_RANGE){
                     creep.moveTo(towers[0]);
                 } else {
                     console.log("attacking tower " + towers[0]);
@@ -46,7 +46,7 @@ var agent = {
             } else {
                 var hostiles = creep.room.find(FIND_HOSTILE_SPAWNS);   
                 if(hostiles.length > 0) {
-                    if(creep.rangedAttack(hostiles[0]) == ERR_NOT_IN_RANGE){
+                    if(creep.attack(hostiles[0]) == ERR_NOT_IN_RANGE){
                         creep.moveTo(hostiles[0]);
                         console.log("moving to " + hostiles[0]);
                     } else {
@@ -56,7 +56,7 @@ var agent = {
                     
                     var structures = creep.room.find(FIND_HOSTILE_STRUCTURES, {filter: (structure) => structure.structureType != 'controller'});
                     if(structures.length > 0) {
-                        if(creep.rangedAttack(structures[0]) == ERR_NOT_IN_RANGE){
+                        if(creep.attack(structures[0]) == ERR_NOT_IN_RANGE){
                             creep.moveTo(structures[0]);
                             console.log("moving to " + structures[0]);
                         } else {
@@ -66,7 +66,7 @@ var agent = {
                         creep.say("bleh");
                         var construction_sites = creep.room.find(FIND_HOSTILE_CONSTRUCTION_SITES);
                         if(construction_sites.length > 0) {
-                            if(creep.rangedAttack(construction_sites[0]) != OK){
+                            if(creep.attack(construction_sites[0]) != OK){
                                 creep.moveTo(construction_sites[0]);
                             } else {
                                 console.log("attacking construction site" + construction_sites[0]);

@@ -2,13 +2,19 @@
  * Return true if you did this operation
  */
  
-var wallHits = 100000;
+var wallHits = 150000;
 
 var depositRepair = {
     deposit: function(creep) {
         if(!creep.memory.repairTargetTypes){
             console.log("Creep " + creep.name + " not configured to repair any types, but is using depositRepair behavior!");
             return ERR_INVALID_TARGET;
+        }
+
+        if(creep.memory.depositRoom && creep.memory.depositRoom != creep.pos.roomName) {
+            creep.moveTo(new RoomPosition(25,25, creep.memory.depositRoom));
+            creep.say("I don't belong here");
+            return true;
         }
         
         var targetTypes = creep.memory.repairTargetTypes.split(",");
