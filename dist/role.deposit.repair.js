@@ -2,7 +2,7 @@
  * Return true if you did this operation
  */
  
-var wallHits = 150000;
+var wallHits = 200000;
 
 var depositRepair = {
     deposit: function(creep) {

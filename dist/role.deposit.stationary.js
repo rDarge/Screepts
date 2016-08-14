@@ -9,6 +9,8 @@
  
 var depositStationary = {
     deposit: function(creep) {
+
+        var resourceType = creep.getResourceType();
         
         var container = creep.room.lookForAt(LOOK_CONSTRUCTION_SITES,creep.pos);
         // console.log("there is a " + container + " at " + container.pos);
@@ -26,7 +28,7 @@ var depositStationary = {
                 // console.log(result);
             } else {
                 // console.log('it isnt busted');
-                creep.drop(RESOURCE_ENERGY);
+                creep.drop(resourceType);
             }
         }
     }

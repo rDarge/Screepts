@@ -14,7 +14,7 @@ var pickupStructure = {
             return ERR_INVALID_TARGET;
         }
         
-        creep.say('dero');
+        // creep.say('dero');
         
         var structureId = creep.memory.pickupStructure;
         var structure = Game.getObjectById(structureId);
@@ -32,7 +32,7 @@ var pickupStructure = {
         }
         
         creep.pickup(creep.room.lookForAt(resourceType,structure.pos)[0]);
-        
+        creep.say(_.sum(creep.carry) + "/" + creep.carryCapacity);
         if(creep.withdraw(structure, resourceType) == ERR_NOT_IN_RANGE){
             creep.moveTo(structure, {ignoreCreeps: false});
         } else if (result != OK) {

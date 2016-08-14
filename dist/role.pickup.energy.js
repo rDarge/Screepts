@@ -9,30 +9,28 @@
  
 var pickupEnergy = {
     pickup: function(creep) {
-        // if(!creep.memory.pickupEnergy) {
-        //     console.log("Creep " + creep.name + " not properly configured to use pickupStructure behavior!");
-        //     return ERR_INVALID_TARGET;
-        // }
         
         if(creep.memory.pickupRoom && creep.pos.roomName != creep.memory.pickupRoom) {
             creep.moveTo(new RoomPosition(25, 25, creep.memory.pickupRoom), {ignoreCreeps: false});
             return true;
         }
+
+        var resourceType = creep.getResourceType();
         
         if(creep.memory.pickupEnergy) {
             var energyId = creep.memory.pickupEnergy;
             var energy = Game.getObjectById(energyId);
         } else  {
-            energy = creep.room.find(FIND_DROPPED_ENERGY, {filter: (resource) => resource.resourceType == RESOURCE_ENERGY});
+            energy = creep.room.find(FIND_DROPPED_ENERGY, {filter: (resource) => resource.resourceType == resourceType})
+                .sort((a, b) => creep.getDistanceTo(a) - creep.getDistanceTo(b));
 
             if(energy) {
                 energy = energy[0];
             }
         }
-        // console.log(energy);
-        // creep.say("fuck!");
         
         result = creep.pickup(energy);
+        creep.say(_.sum(creep.carry) + "/" + creep.carryCapacity);
         if(result == ERR_NOT_IN_RANGE){
             creep.moveTo(energy, {ignoreCreeps: false});
         } else if (result != OK) {

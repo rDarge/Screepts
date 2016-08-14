@@ -27,7 +27,31 @@ toughGuy = {
                     console.log("attacking " + breakThisWall);
                 }
             } else {
-                creep.moveTo(Game.flags.entrypoint);
+                
+
+                var helpTheseCreeps = creep.room.find(FIND_MY_CREEPS, {filter: (creep) => creep.hits < creep.hitsMax - 100});
+        
+                if(helpTheseCreeps.length > 0) {
+                    index = 0; 
+                    result = ERR_NOT_IN_RANGE;
+                    while(result != OK  && index < helpTheseCreeps.length){
+                        helpThisGuy = helpTheseCreeps[index];
+                        result = creep.heal(helpThisGuy);
+                        xdiff = Math.abs(creep.pos.x - helpThisGuy.pos.x);
+                        ydiff = Math.abs(creep.pos.y - helpThisGuy.pos.y);
+                        console.log(xdiff +"  " + ydiff);
+                        if(result == ERR_NOT_IN_RANGE && xdiff < 3 && ydiff < 3) {
+                            creep.say("lol");
+                            creep.moveTo(helpThisGuy);
+                        }
+                        index++;
+                    }
+                    if(result != OK) {
+                        creep.moveTo(Game.flags.entrypoint);
+                    }
+                } else {
+                    creep.moveTo(Game.flags.entrypoint);
+                }
             }
         } else if (creep.memory.fighting) {
             creep.moveTo(Game.flags.entrypoint);

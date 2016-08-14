@@ -9,63 +9,74 @@
  
 var depositStructure = {
     deposit: function(creep) {
-        creep.say("dst");
+        // creep.say("dst");
         if(!creep.memory.depositStructure) {
             console.log("Creep " + creep.name + creep.memory.role +" not properly configured to use depositStructure behavior!");
             return ERR_INVALID_TARGET;
         }
-        
-       
-        var targets = false;
-        var targetIds = creep.memory.depositStructure.split(",");
-        if(targetIds) {
-            targets = targetIds.map((id) => Game.getObjectById(id));
-            // target = Game.getObjectById(targetId);
-        }
 
         //ABSTRACT THIS
-        if(creep.memory.repairRoads && creep.getActiveBodyparts(WORK) > 0) {
-            maybeRoad = creep.room.lookForAt(LOOK_STRUCTURES, creep.pos);
-            if(maybyeRoad.length > 0 && maybeRoad[0].structureType == 'road' && maybeRoad[0].hits < maybeRoad[0].hitsMax){
-                creep.repair(maybeRoad[0]);
-            }
-        }
+        creep.tryToRepairRoads();
         
-        //Transfer type logic:
-        resourceType = RESOURCE_ENERGY;
-        if(creep.memory.resourceType) {
-            resourceType = creep.memory.resourceType;
-        } else {
-            if(creep.carry.Z > 0) {
-                creep.drop(RESOURCE_ZYNTHIUM);
-            } else if (creep.carry.O > 0) {
-                creep.drop(RESOURCE_OXYGEN);
-            }
-        }
-        
-        var index = 0;
-        var target = targets[index];
-        
-        if(target.pos.roomName != creep.pos.roomName) {
-            creep.moveTo(target);
-        } else if(target) {
-            // creep.moveTo(target);
-            // console.log(creep.name + Object.keys(target));
+        if(creep.memory.depositWaypoint && !creep.memory.depositWaypointVisited) {
+            waypoint = Game.flags[creep.memory.depositWaypoint];
+            creep.moveTo(waypoint);
             
-            result = -1;
-            while(result != OK && result != ERR_NOT_IN_RANGE && index < targets.length){
-                target = targets[index++];
-                result = result = creep.transfer(target, resourceType);
+            if(creep.pos.roomName == waypoint.pos.roomName && creep.pos.x == waypoint.pos.x && creep.pos.y == waypoint.pos.y) {
+                creep.memory.depositWaypointVisited = true;
             }
-            // console.log(creep.name + result + " and " + resourceType + RESOURCE_ZYNTHIUM);
-            if(result == ERR_NOT_IN_RANGE) {
+        }
+        
+        
+        if(!creep.memory.depositWaypoint || creep.memory.depositWaypointVisited) {
+            var targets = false;
+            var targetIds = creep.memory.depositStructure.split(",");
+            if(targetIds) {
+                targets = targetIds.map((id) => Game.getObjectById(id));
+                // target = Game.getObjectById(targetId);
+            }
+            
+            //Transfer type logic:
+            resourceType = RESOURCE_ENERGY;
+            if(creep.memory.resourceType) {
+                resourceType = creep.memory.resourceType;
+            } else {
+                if(creep.carry.Z > 0) {
+                    creep.drop(RESOURCE_ZYNTHIUM);
+                } else if (creep.carry.O > 0) {
+                    creep.drop(RESOURCE_OXYGEN);
+                }
+            }
+            
+            var index = 0;
+            var target = targets[index];
+            
+            if(target && target.pos.roomName != creep.pos.roomName) {
                 creep.moveTo(target);
-            } else if (result == OK) {
-                return true;   
+            } else if(target) {
+                // creep.moveTo(target);
+                // console.log(creep.name + Object.keys(target));
+                
+                result = -1;
+                while(result != OK && result != ERR_NOT_IN_RANGE && index < targets.length){
+                    target = targets[index++];
+                    result = result = creep.transfer(target, resourceType);
+                    if(creep.carry[resourceType] == 0) {
+                        creep.memory.depositWaypointVisited = false;
+                    }
+                }
+                // console.log(creep.name + result + " and " + resourceType + RESOURCE_ZYNTHIUM);
+                if(result == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target);
+                } else if (result == OK) {
+                    return true;   
+                }
+                
             }
-            
+            return false;  
         }
-        return false;   
+        
+        return true;
     }, 
     
     name: "depositStructure"

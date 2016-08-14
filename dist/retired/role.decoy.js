@@ -6,7 +6,7 @@ var decoy = {
         if(creep.room.name == Game.flags.waypoint.pos.roomName){
             creep.memory.waypoint = true;
         } else {
-            console.log("" + Game.flags.waypoint.pos.roomName + " != " + creep.room.name);
+            // console.log("" + Game.flags.waypoint.pos.roomName + " != " + creep.room.name);
         }
         
         //Boogie on down there

@@ -9,7 +9,7 @@
  
 var keeperScout = {
     pickup: function(creep) {
-        creep.moveTo(Game.flags.scout);
+        // creep.moveTo(Game.flags.scout);
         if(creep.pos.roomName == Game.flags.scout.pos.roomName) {
             hostiles = creep.room.find(FIND_HOSTILE_CREEPS)
             spawn = Game.rooms[creep.memory.room].find(FIND_MY_SPAWNS)[0];

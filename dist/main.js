@@ -1,3 +1,6 @@
+//Prototypes
+require('util.creep')();
+
 //Configuration imports
 var roomConfigurations = require('config.rooms');
 
@@ -7,7 +10,6 @@ var keeperHarvesterUtil = require('util.keeperHarvester');
 
 //Deprecated
 var navigator = require('util.navigator');
-// var harvesterChain = require('role.harvesterChain');
 // var roadBuilder = require('main.roadBuilder');
 // var roadConstructor = require('util.roadConstructor');
 
@@ -87,7 +89,7 @@ module.exports.loop = function () {
             
             //Diagnostic logs for creeps
             respawn_buffer = record.respawnTime ? record.respawnTime : CREEP_DEATH_BUFFER;
-            healthyTroops = troops.filter((creep) =>creep.ticksToLive > respawn_buffer);
+            healthyTroops = troops.filter((creep) => creep.ticksToLive > respawn_buffer || creep.ticksToLive == undefined);
             
             //Evaluate room-based calculated counts
             count = record.count;
@@ -146,10 +148,12 @@ module.exports.loop = function () {
                     // console.log(troop.name + "carrying " + troop.carry.energy + " " + troop.memory.collecting);
                     if(troop.memory.collecting == undefined) {
                         troop.memory.collecting = true;
+                        troop.memory.depositWaypointVisited = false;
                     }
                     
                     if(!troop.memory.collecting && troop.carry.energy == 0) {
                         troop.memory.collecting = true;
+                        troop.memory.depositWaypointVisited = false;
                     }
                     if(troop.memory.collecting && troop.carryCapacity == _.sum(troop.carry) && troop.getActiveBodyparts(CARRY) > 0) {
                         troop.memory.collecting = false;
@@ -158,6 +162,8 @@ module.exports.loop = function () {
                     try {
                        // console.log(troop.name);
                         if(troop.memory.collecting || !record.depositBehavior) {
+                            //Temporary
+                            troop.memory.depositWaypointVisited = false;
                            // console.log("picking up")
                            if(Array.isArray(record.pickupBehavior)) {
                                 startIndex = 0;
@@ -205,6 +211,9 @@ module.exports.loop = function () {
                 } else if (healthyTroops.length > count && number == 0) {
                     //Obsolete creeps that are not accounted for :(
                     troop.say("I'm extra!");
+                    troop.memory.role = 'obsolete';
+                } else if (troop.room.find(FIND_HOSTILE_CREEPS).length > 0 && troop.pos.roomName != troop.memory.room) {
+                    troop.say("Oh shit!");
                     troop.memory.role = 'obsolete';
                 }
             }); //End of troop loop

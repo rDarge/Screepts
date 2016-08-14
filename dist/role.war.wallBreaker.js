@@ -19,30 +19,30 @@ wallBreaker = {
 
         // creep.moveTo(Game.flags.cs);
         //See if we got to the waypoint
-        if(!creep.memory.waypoint && creep.pos.roomName == Game.flags.waypoint.pos.roomName){
-            creep.memory.waypoint = true;
-        } else if(!creep.memory.waypoint) {
-            creep.moveTo(Game.flags.waypoint);
-        }
+        // if(!creep.memory.waypoint && creep.pos.roomName == Game.flags.waypoint.pos.roomName){
+        //     creep.memory.waypoint = true;
+        // } else if(!creep.memory.waypoint) {
+        //     creep.moveTo(Game.flags.waypoint);
+        // }
         
-        if (creep.memory.waypoint && !creep.memory.waypoint2 && creep.pos.roomName == Game.flags.waypoint2.pos.roomName){
-            creep.memory.waypoint2 = true;
-        } else if (!creep.memory.waypoint2 && creep.memory.waypoint) {
-            creep.moveTo(Game.flags.waypoint2);
-        }
+        // if (creep.memory.waypoint && !creep.memory.waypoint2 && creep.pos.roomName == Game.flags.waypoint2.pos.roomName){
+        //     creep.memory.waypoint2 = true;
+        // } else if (!creep.memory.waypoint2 && creep.memory.waypoint) {
+        //     creep.moveTo(Game.flags.waypoint2);
+        // }
 
-        if (creep.memory.waypoint2 && !creep.memory.waypoint4 && creep.pos.roomName == Game.flags.waypoint4.pos.roomName){
-            creep.memory.waypoint4 = true;
-        } else if (!creep.memory.waypoint4 && creep.memory.waypoint2) {
-            creep.moveTo(Game.flags.waypoint4);
-        }
+        // if (creep.memory.waypoint2 && !creep.memory.waypoint4 && creep.pos.roomName == Game.flags.waypoint4.pos.roomName){
+        //     creep.memory.waypoint4 = true;
+        // } else if (!creep.memory.waypoint4 && creep.memory.waypoint2) {
+        //     creep.moveTo(Game.flags.waypoint4);
+        // }
         
-        if(creep.memory.waypoint4) {
-            console.log(creep.pos.roomName + Game.flags.entrypoint.pos.roomName);
-            if(creep.memory.fighting && creep.pos.roomName == Game.flags.entrypoint.pos.roomName) {
+        if(true) {
+            console.log(creep.pos.roomName + Game.flags.trenches.pos.roomName);
+            if(creep.memory.fighting && creep.pos.roomName == Game.flags.trenches.pos.roomName) {
                 
                 //Break the first wall
-                var breakThis = creep.room.lookForAt(LOOK_STRUCTURES, Game.flags.entrypoint);
+                var breakThis = creep.room.lookForAt(LOOK_STRUCTURES, Game.flags.trenches);
                 
                 //Break the second wall
                 if(breakThis.length == 0) {
@@ -51,7 +51,19 @@ wallBreaker = {
                 
                 //Break their spawn
                 if(breakThis.length == 0) {
+                    breakThis = creep.room.find(FIND_HOSTILE_STRUCTURES, {filter: (structure) => structure.structureType == 'tower'});
+                }
+
+                if(breakThis.length == 0) {
+                    breakThis = creep.room.find(FIND_HOSTILE_STRUCTURES, {filter: (structure) => structure.structureType == 'spawn'});
+                }
+
+                if(breakThis.length == 0) {
                     breakThis = creep.room.find(FIND_HOSTILE_STRUCTURES, {filter: (structure) => structure.structureType == 'extension'});
+                }
+
+                if(breakThis.length == 0) {
+                    // breakThis = creep.room.find(FIND_STRUCTURES, {filter: (structure) => structure.structureType == 'road'});
                 }
                 
                 
@@ -64,9 +76,9 @@ wallBreaker = {
                     }
                 }
             } else if (creep.memory.fighting) {
-                creep.moveTo(Game.flags.entrypoint);
+                creep.moveTo(Game.flags.trenches);
             } else {
-                // creep.moveTo(Game.flags.trenches);
+                creep.moveTo(Game.flags.trenches);
             }
         }
         

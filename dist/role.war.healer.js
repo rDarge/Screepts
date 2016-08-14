@@ -21,7 +21,7 @@ healer = {
                 result = creep.heal(helpThisGuy);
                 xdiff = Math.abs(Game.flags.trenches.pos.x - helpThisGuy.pos.x);
                 ydiff = Math.abs(Game.flags.trenches.pos.y - helpThisGuy.pos.y);
-                console.log(xdiff +"  " + ydiff);
+                // console.log(xdiff +"  " + ydiff);
                 if(result == ERR_NOT_IN_RANGE && xdiff < 3 && ydiff < 3) {
                     creep.say("lol");
                     creep.moveTo(helpThisGuy);

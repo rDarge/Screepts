@@ -36,9 +36,13 @@ var pickupSource = {
         }
         
         if(container && (creep.pos.x != container.pos.x || creep.pos.y != container.pos.y)) {
-            creep.moveTo(container, {ignoreCreeps: false});
+            result = creep.moveTo(container, {ignoreCreeps: false});
         } else {
-            creep.moveTo(source, {ignoreCreeps: false});
+            result = creep.moveTo(source, {ignoreCreeps: false});
+        }
+
+        if(result == ERR_NO_PATH){
+            return false;
         }
         
         result = creep.harvest(source);

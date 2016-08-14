@@ -13,7 +13,7 @@ var claimer = {
             var moveResult =creep.moveTo(target);
             // console.log("claimer on the go in " + creep.pos + ":" + moveResult + " with " + creep.ticksToLive + " ticks to go!");
         }  else {
-            if(creep.room.name == 'W14N47') {
+            if(creep.room.name == Game.flags.claim.pos.roomName) {
                 claim = creep.claimController(creep.room.controller);
                 if(claim == ERR_NOT_IN_RANGE) {
                     creep.say("gonna claim it!");
