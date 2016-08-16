@@ -31,7 +31,14 @@ var depositSpawn = {
         if(targets.length > 0) {
             creep.say(getDistance(creep,targets[0]));
             // creep.say("on the way to " + targets[0]);
-            if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+
+            result = creep.transfer(targets[0], RESOURCE_ENERGY);
+
+            if(result == OK) {
+                creep.report("creeped", Math.min(targets[0].energyCapacity - targets[0].energy, creep.carry[RESOURCE_ENERGY]));
+            }
+
+            if(result == ERR_NOT_IN_RANGE) {
                 creep.moveTo(targets[0]);
             }
         } else {

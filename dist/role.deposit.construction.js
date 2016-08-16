@@ -39,7 +39,13 @@ var depositConstruction = {
             var targets = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
             if(targets.length > 0) {
                 // console.log("There are " + targets.length + " things to build in room "+creep.room.name+"!");
-                if(creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
+
+                result = creep.build(targets[0]);
+                if(result == OK) {
+                    creep.report("constructed", creep.getActiveBodyparts(WORK));
+                }
+
+                if(result == ERR_NOT_IN_RANGE) {
                     creep.moveTo(targets[0], {ignoreCreeps: false});
                 }
             }

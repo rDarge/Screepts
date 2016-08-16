@@ -25,7 +25,6 @@ var keeperHarvester = {
         } else if (keeperRoomOpen < (Game.time + 3*17) && keeperRoomClosed > Game.time) {
             //State 2: The keeperRoom is open! This happens when the Keepers despawn.
             //Spawn your dudes to get that loot!
-            console.log("WFDSADASDS");
             spawn.memory[scout_memory_string] = 0; 
             spawn.memory[miner_memory_string] = 1; 
             spawn.memory[hauler_memory_string] = 1;
@@ -37,9 +36,9 @@ var keeperHarvester = {
         }
 
         //TODO move this outta here
-        if(Game.time % 5 == 0 && keeperRoomOpen && keeperRoomClosed) {
-            console.log("The keeper room is open from tick " + keeperRoomOpen + "(" + (keeperRoomOpen - Game.time) + " ticks away) until tick " + keeperRoomClosed);
-        }
+        // if(Game.time % 5 == 0 && keeperRoomOpen && keeperRoomClosed) {
+        //     console.log("The keeper room is open from tick " + keeperRoomOpen + "(" + (keeperRoomOpen - Game.time) + " ticks away) until tick " + keeperRoomClosed);
+        // }
         
         
         // if(spawn.memory.ticksToSpawn && spawn.memory.ticksToSpawn > 1) {

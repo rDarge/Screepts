@@ -60,7 +60,9 @@ var depositStructure = {
                 result = -1;
                 while(result != OK && result != ERR_NOT_IN_RANGE && index < targets.length){
                     target = targets[index++];
+
                     result = result = creep.transfer(target, resourceType);
+
                     if(creep.carry[resourceType] == 0) {
                         creep.memory.depositWaypointVisited = false;
                     }
@@ -69,6 +71,16 @@ var depositStructure = {
                 if(result == ERR_NOT_IN_RANGE) {
                     creep.moveTo(target);
                 } else if (result == OK) {
+                    if(target.structureType == 'tower') {
+                        amount = Math.min(target.energyCapacity - target.energy, creep.carry[resourceType]);
+                        creep.report("towered", amount);
+                    } else if(target.structureType == 'storage') {
+                        amount = Math.min(target.storeCapacity - _.sum(target.store), creep.carry[resourceType]);
+                        creep.report("stored", amount);
+                    } else if(target.structureType == 'link') {
+                        amount = Math.min(target.energyCapacity - target.energy, creep.carry[resourceType]);
+                        creep.report("linked", amount);
+                    }
                     return true;   
                 }
                 

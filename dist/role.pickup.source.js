@@ -45,7 +45,13 @@ var pickupSource = {
             return false;
         }
         
+
+        resourceType = creep.getResourceType();
         result = creep.harvest(source);
+        if(result == OK) {
+            creep.report("harvested", Math.min(creep.getActiveBodyparts(WORK) * 2, creep.carryCapacity - _.sum(creep.carry)));
+        }
+
         if(result == OK && Game.time % 2 == 0) {
             creep.say("Yum!");
         } else if (result != ERR_NOT_IN_RANGE) {

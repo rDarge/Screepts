@@ -22,7 +22,7 @@ var pickupEnergy = {
             var energy = Game.getObjectById(energyId);
         } else  {
             energy = creep.room.find(FIND_DROPPED_ENERGY, {filter: (resource) => resource.resourceType == resourceType})
-                .sort((a, b) => creep.getDistanceTo(a) - creep.getDistanceTo(b));
+                .sort((a, b) => b.amount - a.amount);
 
             if(energy) {
                 energy = energy[0];
@@ -30,13 +30,18 @@ var pickupEnergy = {
         }
         
         result = creep.pickup(energy);
+        if(result == OK) {
+            creep.report("scavenged", Math.min(energy.amount, creep.carryCapacity - _.sum(creep.carry)));
+        }
+        
+
         creep.say(_.sum(creep.carry) + "/" + creep.carryCapacity);
         if(result == ERR_NOT_IN_RANGE){
             creep.moveTo(energy, {ignoreCreeps: false});
         } else if (result != OK) {
             return false;
         }
-        
+
         return true;
     }
 }

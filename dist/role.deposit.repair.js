@@ -2,7 +2,7 @@
  * Return true if you did this operation
  */
  
-var wallHits = 200000;
+var wallHits = 300000;
 
 var depositRepair = {
     deposit: function(creep) {
@@ -12,6 +12,7 @@ var depositRepair = {
         }
 
         if(creep.memory.depositRoom && creep.memory.depositRoom != creep.pos.roomName) {
+            creep.tryToRepairRoads();
             creep.moveTo(new RoomPosition(25,25, creep.memory.depositRoom));
             creep.say("I don't belong here");
             return true;
@@ -36,7 +37,13 @@ var depositRepair = {
         
         // console.log(creep.name + " should repair " + targets.length + "things");
         if(targets.length > 0) {
-            if(creep.repair(targets[0]) == ERR_NOT_IN_RANGE) {
+
+            result = creep.repair(targets[0]);
+            if(result == OK) {
+                creep.report("repaired", creep.getActiveBodyparts(WORK));
+            }
+
+            if(result == ERR_NOT_IN_RANGE) {
                 creep.moveTo(targets[0]);
                 creep.say(targets[0].structureType);
             }

@@ -23,12 +23,21 @@ var depositStationary = {
             container = container[0];
             // console.log(creep.name + container + Object.keys(container));
             
+            var resourceType = creep.getResourceType();
             if(container && container.hits < container.hitsMax) {
+                
                 result = creep.repair(container);
+                if(result == OK) {
+                    creep.report("repaired", creep.getActiveBodyparts(WORK));
+                }
+
                 // console.log(result);
             } else {
                 // console.log('it isnt busted');
-                creep.drop(resourceType);
+                result = creep.drop(resourceType);
+                if(result == OK) {
+                    creep.report("dropped", creep.carry[resourceType]);
+                }
             }
         }
     }

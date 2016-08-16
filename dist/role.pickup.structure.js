@@ -26,12 +26,10 @@ var pickupStructure = {
         }
         
         //Transfer type logic:
-        resourceType = RESOURCE_ENERGY;
-        if(creep.memory.resourceType) {
-            resourceType = creep.memory.resourceType;
-        }
+        resourceType = creep.getResourceType();
         
-        creep.pickup(creep.room.lookForAt(resourceType,structure.pos)[0]);
+        result = creep.pickup(creep.room.lookForAt(resourceType,structure.pos)[0]);
+
         creep.say(_.sum(creep.carry) + "/" + creep.carryCapacity);
         if(creep.withdraw(structure, resourceType) == ERR_NOT_IN_RANGE){
             creep.moveTo(structure, {ignoreCreeps: false});

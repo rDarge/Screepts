@@ -16,6 +16,10 @@ var depositController = {
         } else {
             
             result = creep.upgradeController(creep.room.controller);
+            if(result == OK) {
+                creep.report("deposited", creep.getActiveBodyparts(WORK));
+            }
+
             if(creep.memory.depositWaypoint) {
                 creep.moveTo(Game.flags[creep.memory.depositWaypoint]);
             } else if(result == ERR_NOT_IN_RANGE){

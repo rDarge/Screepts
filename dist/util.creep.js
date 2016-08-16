@@ -31,6 +31,20 @@ module.exports = function() {
                 this.repair(maybeRoad[0]);
             }
         }
+	},
+
+	Creep.prototype.report = function(key, amount) {
+		try {
+			// console.log("trying to increment " + key + " by " + amount);
+			if(amount > 0 && this.getResourceType() == RESOURCE_ENERGY) {
+				Memory["cached_rooms"][this.pos.roomName]["stats"]["creep"][key] = Memory["cached_rooms"][this.pos.roomName]["stats"]["creep"][key] + amount;
+				// console.log(this.name + " " + key + " " + amount + " " + this.getResourceType());
+				// console.log("total so far is " +JSON.stringify(Memory["cached_rooms"][this.pos.roomName]["stats"]["creep"][key]));
+			}
+		} catch (err) {
+			console.log (err);
+		}
+		
 	}
 
 };
