@@ -36,9 +36,10 @@ var depositConstruction = {
             }
 
             //Otherwise do work!
-            var targets = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
+            var targets = creep.room.find(FIND_MY_CONSTRUCTION_SITES).sort((a, b) => creep.getDistanceTo(a) - creep.getDistanceTo(b));
             if(targets.length > 0) {
                 // console.log("There are " + targets.length + " things to build in room "+creep.room.name+"!");
+                creep.say(creep.getDistanceTo(targets[0]));
 
                 result = creep.build(targets[0]);
                 if(result == OK) {

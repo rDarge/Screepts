@@ -5,6 +5,7 @@
 
 */
 //Prototypes
+require('config.roles.builder')();
 require('util.creep')();
 
 //Configuration imports
@@ -19,6 +20,8 @@ var navigator = require('util.navigator');
 // var roadBuilder = require('main.roadBuilder');
 // var roadConstructor = require('util.roadConstructor');
 
+var builder = require('config.roles.builder');
+
 module.exports.loop = function () {
     
     //Configurations
@@ -26,6 +29,7 @@ module.exports.loop = function () {
     var TOWER_SAFETY_BUFFFER = 500;
     var CREEP_DEATH_BUFFER = 100;
     var STATUS_REPORT_INTERVAL = 450;
+    var SHORT_REPORT_INTERVAL = 20;
     
     //Labs
     var zLab = Game.getObjectById("57a404759c6ec19f1b0669b1")
@@ -60,7 +64,7 @@ module.exports.loop = function () {
         var ramparts        = thisRoom.find(FIND_STRUCTURES, {filter: function(structure) { return ((structure.structureType == 'rampart') && structure.hits < WALL_DEFENSE);}}); 
         var repairThese     = thisRoom.find(FIND_STRUCTURES, {filter: function(structure) { 
                 return  (structure.structureType == "constructedWall"   && structure.hits < WALL_DEFENSE) || 
-                        (structure.structureType == 'road'              && structure.hits < structure.hitsMax - towers.length*800) || 
+                        (structure.structureType == 'road'              && structure.hits < 1000) || 
                         (structure.structureType == 'container'         && structure.hits < structure.hitsMax - towers.length*800);}});
         // console.log("there are " +repairThese.length + " things to repair!");
         var hostiles        = thisRoom.find(FIND_HOSTILE_CREEPS, {filter: function(hostile) { return hostile.getActiveBodyparts(ATTACK) + hostile.getActiveBodyparts(WORK) + hostile.getActiveBodyparts(RANGED_ATTACK) + hostile.getActiveBodyparts(HEAL) > 0;}});
@@ -128,7 +132,7 @@ module.exports.loop = function () {
                 // console.log(record.memory.pickupRoom);
                 evacuationCall = Memory["cached_rooms"][record.memory.pickupRoom].evacuating
                 if(evacuationCall != undefined && evacuationCall > Game.time) {
-                    // console.log("Not sending any non-brave creeps to " + record.memory.pickupRoom)
+                    // console.log("Not sending any non-brave creeps to " + record.memory.pickupRoom + " for " + (evacuationCall - Game.time) + " more ticks!");
                     evacuating = true;
                 }
             }
@@ -255,37 +259,61 @@ module.exports.loop = function () {
                     }
                 }
                 
+                //Visible notification about creep life expectancy 
                 if(troop.ticksToLive < CREEP_DEATH_BUFFER){
                     if(healthyTroops.length == count) {
                         troop.say("I'm ready to die");
                     } else {
                         troop.say("I'm dying!");
-                        // troop.memory.role = 'obsolete';
                     }
-                } else if (healthyTroops.length > count && number == 0) {
+                } 
+
+                //Auto-obsoletion of extra troops
+                if (healthyTroops.length > count && number == 0) {
                     //Obsolete creeps that are not accounted for :(
                     troop.say("I'm extra!");
                     troop.memory.oldrole = troop.memory.role;
                     troop.memory.role = 'obsolete';
-                } else if (troop.room.find(FIND_HOSTILE_CREEPS).length > 0 && troop.pos.roomName != troop.memory.room && !troop.memory.brave) {
-                    if(!Memory["cached_rooms"][troop.pos.roomName].evacuating) {
-                        Memory["cached_rooms"][troop.pos.roomName].evacuating = Game.time + troop.room.find(FIND_HOSTILE_CREEPS)[0].ticksToLive;
+                }
+
+                //Next step: Respond to hostile creep presence
+                if (_.filter(troop.room.find(FIND_HOSTILE_CREEPS), 
+                        (hostile) => 
+                            hostile.getActiveBodyparts(ATTACK) + 
+                            hostile.getActiveBodyparts(WORK) + 
+                            hostile.getActiveBodyparts(RANGED_ATTACK) + 
+                            hostile.getActiveBodyparts(HEAL) > 0
+                        ).length > 0) {
+                    //If creeps are designated as remote creeps, evacuate that room:
+                    if(troop.memory.pickupRoom != troop.memory.room || (troop.memory.brave && troop.hits < troop.hitsMax && troop.pos.roomName != troop.memory.room)) {
+                        evacuating = Memory["cached_rooms"][troop.pos.roomName].evacuating;
+                        // console.log("evacuate room " +troop.pos.roomName+"!");
+                        if(evacuating > Game.time) {
+                            console.log("evacuate room " + troop.pos.roomName + "!");
+                            var invader = troop.room.find(FIND_HOSTILE_CREEPS)[0];
+                            troop.reportInvasion(invader);
+                        }
                     }
+                } else {
+                    troop.reportAllClear();
+                }
+
+                //Next step: Respond to damage and evacuation calls
+                if( (Memory["cached_rooms"][troop.pos.roomName].evacuating > Game.time) ||
+                    (troop.memory.pickupRoom && Memory["cached_rooms"][troop.memory.pickupRoom].evacuating > Game.time)) {
+                    //Evacuate!
                     troop.say("Scary!");
-                    troop.memory.oldrole = troop.memory.role;
-                    troop.memory.role = 'obsolete';
-                } else if (troop.memory.brave && troop.hits < troop.hitsMax) {
-                    //In this temporary case we just want to obsolete them and try again, this is a fallback for brave creeps that don't know their own good
-                    troop.memory.oldrole = troop.memory.role;
-                    troop.memory.role = 'obsolete';
-                    troop.room.find(FIND_MY_CREEPS).forEach((creep) => creep.memory.role = 'obsolete');
+                    if(troop.memory.role != 'obsolete' && troop.memory.pickupRoom && troop.memory.pickupRoom != troop.memory.room && (!troop.memory.brave || troop.hits < troop.hitsMax)) {
+                        troop.say("Too scary for me!");
+                        troop.memory.oldrole = troop.memory.role;
+                        troop.memory.role = 'obsolete';
+                    }
                 }
 
 
                 if(Memory["cached_rooms"][troop.pos.roomName].evacuating !== undefined && Memory["cached_rooms"][troop.pos.roomName].evacuating > Game.time && !troop.memory.brave) {
                     troop.memory.evacuating = true;
-                    console.log("We should evacuate " + troop.pos.roomName + "!");
-                    
+                    console.log("We should evacuate " + troop.pos.roomName + " for " + (Game.time - Memory["cached_rooms"][troop.pos.roomName].evacuating) + " more ticks!");
                 }
 
             }); //End of troop loop
@@ -294,7 +322,7 @@ module.exports.loop = function () {
             troopCount = " All creeps present and accounted for.";
         }
         
-        if(Game.time % STATUS_REPORT_INTERVAL === 0) {
+        if(Game.time % STATUS_REPORT_INTERVAL === 0 || Game.time % SHORT_REPORT_INTERVAL === 0) {
             roomCost = energyManager.calculateForRecord(value);
             debugMessage += thisName + " statistics: " + troopCount + "\n";
             debugMessage += "   and has " + 
@@ -325,8 +353,9 @@ module.exports.loop = function () {
         statusReport += "Status Report By Rooms:\n";
 
         var keys = ["harvested  ",
-                    "dropped    ",
-                    "scavenged  ",
+                    "skipped_harvesting",
+                    // "dropped    ",
+                    // "scavenged  ",
                     "stored     ",
                     "creeped   ",
                     "deposited  ",
@@ -334,7 +363,8 @@ module.exports.loop = function () {
                     "repaired   ",
                     "towered    ",
                     "linked     ",
-                    "containered"];
+                    // "containered"
+                    ];
 
         var roomReport = "Room\t"
         keys.forEach(function(key) {
@@ -379,6 +409,8 @@ module.exports.loop = function () {
         //Batch emails to the mothership
         Game.notify(debugMessage);
         Game.notify(roomReport);
+    } else  if(Game.time % SHORT_REPORT_INTERVAL === 0) {
+        console.log("Interim report:\n" + debugMessage);
     }
     
     

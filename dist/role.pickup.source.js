@@ -35,29 +35,39 @@ var pickupSource = {
             container = false;
         }
         
+        var targetX = source.pos.x;
+        var targetY = source.pos.y;
         if(container && (creep.pos.x != container.pos.x || creep.pos.y != container.pos.y)) {
-            result = creep.moveTo(container, {ignoreCreeps: false});
+            result = creep.moveTo(container);
+            targetX = container.pos.x;
+            targetY = container.pos.y;
         } else {
-            result = creep.moveTo(source, {ignoreCreeps: false});
+            result = creep.moveTo(source);
         }
 
         if(result == ERR_NO_PATH){
             return false;
         }
+
+        // console.log(creep.name + result);
         
 
         resourceType = creep.getResourceType();
-        result = creep.harvest(source);
-        if(result == OK) {
-            creep.report("harvested", Math.min(creep.getActiveBodyparts(WORK) * 2, creep.carryCapacity - _.sum(creep.carry)));
+        if((container && container.store[RESOURCE_ENERGY] < container.storeCapacity) || !container) {
+            result = creep.harvestAndReport(source);
+        } else {
+            console.log("lame! Skipping harvest opportunity in room " + creep.pos.roomName);
+            creep.report("skipped_harvesting", creep.getActiveBodyparts(WORK) * 2);
         }
 
         if(result == OK && Game.time % 2 == 0) {
             creep.say("Yum!");
-        } else if (result != ERR_NOT_IN_RANGE) {
+        } else if (creep.room.lookForAt(LOOK_CREEPS, new RoomPosition(targetX,targetY,creep.pos.roomName)).length > 0) {
+            creep.say("Welp!");
             return false;
         }
         
+        creep.say("Tally-ho!");
         return true;
     }
 }

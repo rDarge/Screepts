@@ -2,7 +2,7 @@
  * Return true if you did this operation
  */
  
-var wallHits = 300000;
+var wallHits = 350000;
 
 var depositRepair = {
     deposit: function(creep) {
@@ -30,7 +30,7 @@ var depositRepair = {
                          (structure.structureType == 'rampart' && structure.hits < wallHits) ||
                          (structure.structureType == 'road' && structure.hits < structure.hitsMax) ||
                          (structure.structureType == 'container' && structure.hits < structure.hitsMax));
-            }});
+            }}).sort((a, b) => creep.getDistanceTo(a) - creep.getDistanceTo(b));
             // console.log(targetTypes[index] + targets.length);
             index = index + 1;
         }
