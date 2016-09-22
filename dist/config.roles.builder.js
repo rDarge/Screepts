@@ -21,6 +21,7 @@ var warWallBreaker = require('role.war.wallBreaker');
 var warMurderer = require('role.war.murderer');
 var warKeeperScout = require('role.war.keeperScout');
 var warKeeperKiller = require('role.war.keeperKiller');
+var warRemoteGuard = require('role.war.remoteGuard');
 
 module.exports = function() {
 
@@ -31,6 +32,7 @@ module.exports = function() {
 		this.pickupBehavior = [];
 		this.depositBehavior = [];
 		this.memory = {};
+		this.memory.repairRoads = true;
 	};
 
 	CreepModel.prototype.setResourceType = function(resourceType) {
@@ -49,6 +51,9 @@ module.exports = function() {
 		this.pickupBehavior.push(pickupSource);
 		this.memory.pickupSource = source;
 		this.setResourceType(resourceType);
+		// if(resourceType != undefined) {
+		// 	console.log(resourceType);
+		// }
 		return this;
 	}
 	
@@ -65,6 +70,16 @@ module.exports = function() {
 		return this;
 	}
 
+	CreepModel.prototype.claims = function() {
+		this.pickupBehavior.push(warClaimer);
+		return this;
+	}
+
+	CreepModel.prototype.attacks = function() {
+		this.pickupBehavior.push(warRemoteGuard);
+		return this.andIsBrave();
+	}
+
 	/*
 		Helpers
 	*/
@@ -76,6 +91,20 @@ module.exports = function() {
 			this.memory.depositRoom = room;
 		} else {
 			console.log(this.name + " is using the 'in' function improperly");
+		}
+
+		if(Memory["cached_rooms"][room] == undefined) {
+			Memory["cached_rooms"][room] = {};
+		}
+
+		return this;
+	}
+
+	CreepModel.prototype.via = function(waypointFlag) {
+		if(this.depositBehavior.length == 0) {
+			this.memory.pickupWaypoint = waypointFlag;
+		} else {
+			this.memory.depositWaypoint = waypointFlag;
 		}
 		return this;
 	}
@@ -93,6 +122,12 @@ module.exports = function() {
 		this.depositBehavior.push(depositRepair);
 		this.memory.repairTargetTypes = types;
 		return this;
+	}
+	
+	CreepModel.prototype.andRepairsUpTo = function(types, maxHits) {
+	    this.andRepairs(types)
+	    this.memory.wallHits = maxHits;
+	    return this;
 	}
 
 	CreepModel.prototype.andBuilds = function(){
@@ -118,10 +153,13 @@ module.exports = function() {
 	/*
 		Modifiers
 	*/
-
-	//TODO make an "if" function to separate these two logical bits
 	CreepModel.prototype.withFriends = function(count) {
 		this.count = count;
+		return this;
+	}
+
+	CreepModel.prototype.butOnlyIf = function(check) {
+		this.count = check ? this.count : 0;
 		return this;
 	}
 

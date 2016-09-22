@@ -16,9 +16,19 @@ var pickupSource = {
         
         var sourceId = creep.memory.pickupSource;
         var source = Game.getObjectById(sourceId);
-        if(source == null) {
+        if(creep.memory.pickupRoom && creep.pos.roomName != creep.memory.pickupRoom) {
+            var target = new RoomPosition(25, 25, creep.memory.pickupRoom)
+            if(creep.memory.pickupWaypoint && !creep.memory.pickupWaypointVisited) {
+                creep.say("to waypoint");
+                target = Game.flags[creep.memory.pickupWaypoint]
+                if(creep.getDistanceTo(target) < 2 && creep.pos.roomName == target.roomName) {
+                    console.log("welp");
+                    creep.memory.pickupWaypointVisited = true;
+                }
+            } 
+
             //Short circuit here to move to the appropriate room that we haven't been to yet
-            creep.moveTo(new RoomPosition(25, 25, creep.memory.pickupRoom), {ignoreCreeps: false});
+            creep.moveTo(target, {ignoreCreeps: false});
             return true;
         }
         
@@ -53,7 +63,7 @@ var pickupSource = {
         
 
         resourceType = creep.getResourceType();
-        if((container && container.store[RESOURCE_ENERGY] < container.storeCapacity) || !container) {
+        if(!container || (container.store[RESOURCE_ENERGY] < container.storeCapacity) || (container.hits < container.hitsMax)) {
             result = creep.harvestAndReport(source);
         } else {
             console.log("lame! Skipping harvest opportunity in room " + creep.pos.roomName);

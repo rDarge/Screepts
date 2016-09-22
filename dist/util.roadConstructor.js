@@ -11,7 +11,7 @@ var roadConstructor = {
             room.createConstructionSite(element.x, element.y, structure);
             //console.log(index + " is " + path[index]);
         });
-	}
+    }
 };
 
 module.exports = roadConstructor;

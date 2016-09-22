@@ -6,6 +6,24 @@
  * var mod = require('role.deposit.structure');
  * mod.thing == 'a thing'; // true
  */
+
+function getEnergy(structure) {
+    if(structure.store) {
+        structure.energy = structure.store[RESOURCE_ENERGY];
+    }
+
+    return structure.energy;
+};
+
+function getSpaceForEnergy(structure) {
+    if(structure.store) {
+        structure.spaceForEnergy = structure.storeCapacity - _.sum(structure.store);
+    } else {
+        structure.spaceForEnergy = structure.energyCapacity - getEnergy(structure);
+    }
+
+    return structure.spaceForEnergy;
+}
  
 var depositStructure = {
     deposit: function(creep) {
@@ -17,14 +35,19 @@ var depositStructure = {
 
         //ABSTRACT THIS
         creep.tryToRepairRoads();
-        
         if(creep.memory.depositWaypoint && !creep.memory.depositWaypointVisited) {
             waypoint = Game.flags[creep.memory.depositWaypoint];
+            creep.say(creep.getDistanceTo(waypoint));
+            if(creep.pos.roomName == waypoint.pos.roomName && creep.getDistanceTo(waypoint) < 1) {
+                creep.say("fouuuuu" + creep.getDistanceTo(waypoint));
+                // console.log("woof " + creep.memory.depositWaypointVisited);
+                creep.memory.depositWaypointVisited = true;
+                // console.log("woof " + creep.memory.depositWaypointVisited);
+            }
+
             creep.moveTo(waypoint);
             
-            if(creep.pos.roomName == waypoint.pos.roomName && creep.pos.x == waypoint.pos.x && creep.pos.y == waypoint.pos.y) {
-                creep.memory.depositWaypointVisited = true;
-            }
+            return;
         }
         
         
@@ -32,7 +55,7 @@ var depositStructure = {
             var targets = false;
             var targetIds = creep.memory.depositStructure.split(",");
             if(targetIds) {
-                targets = targetIds.map((id) => Game.getObjectById(id));
+                targets = targetIds.map((id) => Game.getObjectById(id)).filter((structure) => getSpaceForEnergy(structure) > 0);
                 // target = Game.getObjectById(targetId);
             }
             

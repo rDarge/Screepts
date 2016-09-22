@@ -12,10 +12,10 @@ wallBreaker = {
         
         if(creep.memory.fighting && creep.hits < 3000) {
             creep.memory.fighting = false;
-	    }
-	    if(!creep.memory.fighting && creep.hitsMax == creep.hits) {
-	        creep.memory.fighting = true;
-	    }
+        }
+        if(!creep.memory.fighting && creep.hitsMax == creep.hits) {
+            creep.memory.fighting = true;
+        }
 
         // creep.moveTo(Game.flags.cs);
         //See if we got to the waypoint

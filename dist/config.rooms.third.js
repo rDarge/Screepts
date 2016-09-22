@@ -1,66 +1,50 @@
 
+
 //Old roles
-var agent = require('role.agent');
 var obsolete = require('role.obsolete');
 
-//new atomic behaviors
-var pickupSource = require('role.pickup.source');
-var pickupStructure = require('role.pickup.structure');
-var pickupEnergy = require('role.pickup.energy');
+module.exports = function() {
+    // var start = Game.cpu.getUsed();
 
-var depositSpawn = require('role.deposit.spawn');
-var depositStructure = require('role.deposit.structure');
-var depositController = require('role.deposit.controller');
-var depositConstruction = require('role.deposit.construction');
-var depositRepair = require('role.deposit.repair');
-var depositStationary = require('role.deposit.stationary');
+    //Reference Constants
+    var THIS_ROOM = Game.rooms.W14N47;
+    var THIS_SPAWN = Game.spawns.Spawn4;
+    var STORAGE = "57ab15daddb24c075a4cced8";
+    var MINERAL = Game.getObjectById("577b954d4cfed28730762663");
 
-var warClaimer = require('role.war.claimer');
-var warToughGuy = require('role.war.toughGuy');
-var warHealer = require('role.war.healer');
-var warWallBreaker = require('role.war.wallBreaker');
-var warMurderer = require('role.war.murderer');
-var warKeeperScout = require('role.war.keeperScout');
-var warKeeperKiller = require('role.war.keeperKiller');
+    var remoteRooms = ["W15N45", "W15N47"];
+    var invadedRooms = remoteRooms.filter((value) => Memory["cached_rooms"][value].evacuating > 0);
 
-//Labs
-/*
- * Module code goes here. Use 'module.exports' to export things:
- * module.exports.thing = 'a thing';
- *
- * You can import it from another modules like this:
- * var mod = require('role.war.wallBreaker');
- * mod.thing == 'a thing'; // true
- */
+    var droppedEnergy = THIS_ROOM.find(FIND_DROPPED_ENERGY);
 
-var thisRoom = Game.rooms.W14N47;
-var thisSpawn = Game.spawns.Spawn4;
-
-var droppedEnergy = thisRoom.find(FIND_DROPPED_ENERGY);
- 
-room = {
-    configuration: {
+    //For convenience
+    keeperMinerStats = [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
+                        CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE];
+     
+    var room = {
         name: "Satellite 2",
-        room: thisRoom,
-        spawn: thisSpawn,
+        room: THIS_ROOM,
+        spawn: THIS_SPAWN,
         link: "57adf862d4089220049deb82",
         creeps:[
 
             /*---------------------------------------------
                             Local Creeps
             ---------------------------------------------*/
-            new CreepModel("backupHarvester", [CARRY,CARRY,MOVE])
-                .picksUp        ("57ab15daddb24c075a4cced8")
+            new CreepModel("backupHauler", [CARRY,CARRY,MOVE])
+                .picksUp        (STORAGE)
                 .andNurses      ()
-                .withFriends    (thisRoom.find(FIND_MY_CREEPS).length < 5 ? 1 : 0),
+                .butOnlyIf      (THIS_ROOM.find(FIND_MY_CREEPS).length < 5),
 
             new CreepModel("harvester", [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE])
                 .harvests       ("577b934e0f9d51615fa47f3d")
                 .andDeposits    ("57ae203b1c0e8d5f13274ec9,57ae0b8a96b32105101daca4"),
 
-            new CreepModel("nurse", [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE])
-                .picksUp        ("57ab15daddb24c075a4cced8")
-                .andNurses      (),
+            new CreepModel("nurse", [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,
+                                     MOVE,MOVE])
+                .picksUp        (STORAGE)
+                .andNurses      ()
+                .withFriends    (2),
 
             new CreepModel("closeHarvester", [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE])
                 .harvests       ("577b934e0f9d51615fa47f3e")
@@ -69,217 +53,232 @@ room = {
 
             new CreepModel("closeHauler", [CARRY,CARRY,MOVE])
                 .picksUp        ("57a7fdb236786db0629f4b23")
-                .andDeposits    ("57ab15daddb24c075a4cced8"),
+                .andDeposits    (STORAGE),
+                
+            new CreepModel("utriarch", 
+                    [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
+                    CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                    MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
+                .harvests       (MINERAL.id,RESOURCE_UTRIUM)
+                .andDeposits    ("57bae5045d0888d369f94cf2")
+                .butOnlyIf      (MINERAL.mineralAmount > 0),
 
             new CreepModel("linkTender", [CARRY,CARRY,CARRY,CARRY,MOVE,MOVE])
                 .picksUp        ("57adf862d4089220049deb82")
-                .andDeposits    ("57ab15daddb24c075a4cced8"),
+                .andDeposits    (STORAGE),
+                
+            new CreepModel("towerTender", [CARRY,CARRY,CARRY,CARRY,MOVE,MOVE])
+                .picksUp        ("57adf862d4089220049deb82")
+                .andDeposits    ("57cf3129a4eceb9c2454b8fd,57da0adb9e29076b43cef2fb,57da115bfc7838895ccb2f74,57da628b0cc1bec4635edf21,57a86def632092b170c23498,57ae203b1c0e8d5f13274ec9"),
 
             new CreepModel("reclaimer", [CARRY,CARRY,CARRY,CARRY,MOVE,MOVE])
                 .finds          (RESOURCE_ENERGY)
-                .andDeposits    ("57ab15daddb24c075a4cced8")
-                .withFriends    (_.sum(droppedEnergy.map((energy) => energy.amount)) > 1000 ? 1 : 0),
+                .andDeposits    (STORAGE)
+                .butOnlyIf      (true),//_.sum(droppedEnergy.map((energy) => energy.amount)) > 500 ? 1 : 0),
+
+            new CreepModel("roadFixer", [CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE])
+                .picksUp        (STORAGE)
+                .andRepairs     ("road"),
+                
+            new CreepModel("rampartFixer", [CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE])
+                .picksUp        (STORAGE)
+                .andRepairs     ("rampart"),
+                
+            new CreepModel("wallFixer", [CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE])
+                .picksUp        (STORAGE)
+                .andRepairs     ("constructedWall"),
+
+            new CreepModel("upgrader", 
+                    [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
+                     WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE,MOVE])
+                .picksUp        (STORAGE)
+                .andWorships    ()
+                .withFriends    (1),
+                
+            new CreepModel("extra_builder", 
+                    [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
+                    CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,
+                    MOVE,MOVE,MOVE,MOVE])
+                .picksUp        (STORAGE)
+                .andBuilds      ()
+                .withFriends    (1)
+                .butOnlyIf      (THIS_ROOM.find(FIND_MY_CONSTRUCTION_SITES).length > 0),
 
             /*----------------------------------------------
                             Remote Creeps
             ----------------------------------------------*/
 
+            new CreepModel("remote_miner_guard",
+                    [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,
+                     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,ATTACK,
+                     ATTACK,ATTACK,ATTACK,ATTACK,HEAL,HEAL])
+                .attacks        ()
+                .in             (invadedRooms[0])
+                .butOnlyIf      (invadedRooms.length > 0),
+
+            new CreepModel("keeperKiller",
+                    //STRONK
+                    // [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,
+                    //  MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,ATTACK,
+                    //  ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,
+                    //  ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,MOVE,MOVE,
+                    //  MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,HEAL]
+
+                    //Just Alright
+                    [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,ATTACK,ATTACK,ATTACK,ATTACK,
+                     ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,MOVE,MOVE,MOVE,MOVE,MOVE,
+                     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
+                     MOVE,HEAL]
+
+                     )
+                .attacks        ()
+                .in             ("W15N45")
+                .butOnlyIf      (true),
+
+            //Portal Creeps
+
+            new CreepModel("pioneer", [WORK,WORK,WORK,WORK,WORK,MOVE,MOVE,MOVE])
+                .harvests       ("576ab342400bc3bc61d76274", RESOURCE_CATALYST)
+                .in             ("W15S35")
+                .via            ("portal")
+                .andDropsIt     ()
+                .andIsBrave     ()
+                .butOnlyIf(false),
+
+            new CreepModel("pioneer_hauler", 
+                    [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                     CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
+                .finds          (RESOURCE_CATALYST)
+                .in             ("W15S35")
+                .via            ("portal")
+                .andDeposits    (STORAGE)
+                .via            ("portal2")
+                .andIsBrave     ()
+                .withFriends    (2)
+                .butOnlyIf(false),
+
+            //This guy helps lay roads
+
             new CreepModel("handyman", 
-                    [WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,
-                     MOVE,MOVE])
+                    [WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,
+                     MOVE,MOVE,MOVE,MOVE,MOVE])
+                .picksUp        (STORAGE)
+                .in             ("W14N47")
+                .andBuilds      ()
+                // .andRepairs     ("road")
+                .in             ("W15N45")
+                .via            ("handyman")
+                .andIsBrave     ()
+                .butOnlyIf      (false),
+
+            // W15N47 - Disabled till we can get max value from the other room
+
+            new CreepModel("claimer_a", [CLAIM,MOVE,MOVE])
+                .claims         ()
+                .in             ("W14N48")
+                .butOnlyIf      (false),
+
+            new CreepModel("remote_miner_a", [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
+                .harvests       ("577b934e0f9d51615fa47f3a")
+                .in             ("W14N48")
+                .andDropsIt     ()
+                .butOnlyIf      (false),
+                
+            new CreepModel("remote_miner_b", [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
+                .harvests       ("577b934e0f9d51615fa47f39")
+                .in             ("W14N48")
+                .andDropsIt     ()
+                .butOnlyIf      (false),
+                
+            new CreepModel("deliveryMan", 
+                    [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                     CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                     CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,
+                     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
+                     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
+                .picksUp        (STORAGE)
+                .in             ("W14N47")
+                .andDeposits    ("57d4e809c4e0422217650d62")
+                .in             ("W14N48")
+                .withFriends    (2)
+                .butOnlyIf      (false),
+                
+
+            new CreepModel("remote_hauler_a", 
+                    [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                    CARRY,CARRY,CARRY,CARRY,CARRY,WORK,MOVE,MOVE,MOVE,MOVE,
+                    MOVE,MOVE,MOVE,MOVE])
+                .finds          (RESOURCE_ENERGY)
+                .in             ("W15N47")
+                .andDeposits    (STORAGE)
+                .butOnlyIf      (false),
+
+            //Center Room
+
+            new CreepModel("remote_miner_hydro", 
+                    [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE])
+                .harvests       ("577b9559e2e3e3f6319eb41e", RESOURCE_HYDROGEN)
+                .in             ("W15N45")
+                .andDropsIt     ()
+                .andIsBrave     ()
+                .butOnlyIf      (Game.getObjectById(STORAGE).store[RESOURCE_HYDROGEN] < 100000 ? 1 : 0),
+
+            new CreepModel("remote_hauler_hydro",
+                    [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,WORK,
+                     MOVE,MOVE,MOVE,MOVE,MOVE])
+                .finds          (RESOURCE_HYDROGEN)
+                .in             ("W15N45")
+                .andDeposits    (STORAGE)
+                .andIsBrave     ()
+                .butOnlyIf      (Game.getObjectById(STORAGE).store[RESOURCE_HYDROGEN] < 100000 ? 1 : 0),
+
+            new CreepModel("remote_miner_k1", keeperMinerStats)
+                .harvests       ("577b934b0f9d51615fa47ef0")
+                .in             ("W15N45")
+                .andDropsIt     ()
+                .andIsBrave     (),
+
+            new CreepModel("remote_miner_k2", keeperMinerStats)
+                .harvests       ("577b934b0f9d51615fa47ef1")
+                .in             ("W15N45")
+                .andDropsIt     ()
+                .andIsBrave     (),
+
+            new CreepModel("remote_miner_k3", keeperMinerStats)
                 .harvests       ("577b934b0f9d51615fa47ef2")
                 .in             ("W15N45")
-                .andBuilds      ()
-                .andRepairs     ("road")
+                .andDropsIt     ()
+                .andIsBrave     (),
+
+            new CreepModel("remote_hauler_k2",
+                    [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                     CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                     CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                     CARRY,CARRY,WORK,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
+                     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
+                .finds          (RESOURCE_ENERGY)
                 .in             ("W15N45")
+                .andDeposits    ("57b52df12221d8ab76e32b70,57c0909867991cac70a16bbc")
                 .andIsBrave     ()
+                .withFriends    (8),
+
+            /*----------------------------------------
+                        Peacetime Creeps
+            ----------------------------------------*/
+            new CreepModel("extra_upgrader", 
+                    [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
+                     WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
+                     WORK,WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,
+                     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
+                     MOVE])
+                .picksUp        (STORAGE)
+                .andWorships    ()
                 .withFriends    (0),
 
-
-            // {
-            //     role: 'handyman',
-            //     count: 1,
-            //     stats: [WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE],
-            //     pickupBehavior: [pickupSource],
-            //     depositBehavior: [depositConstruction,depositRepair],
-            //     memory: {
-            //         pickupSource: "577b934b0f9d51615fa47ef2",
-            //         pickupRoom: 'W15N45',
-            //         depositRoom: 'W15N45',
-            //         repairTargetTypes: "road",
-            //         brave: true,
-            //         // depositWaypoint: "controllerFlag",
-            //     }
-            // },
+            
+            //Here for legacy purposes
             {
-                role: 'roadFixer',
-                count: 1,
-                stats: [CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE],
-                pickupBehavior: pickupStructure,
-                depositBehavior: [depositRepair],
-                memory: {
-                    pickupStructure: "57ab15daddb24c075a4cced8",
-                    repairTargetTypes: "rampart,road"
-                }
-            },{
-                role: 'wallFixer',
-                count: 1,
-                stats: [CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE],
-                pickupBehavior: [pickupEnergy,pickupStructure],
-                depositBehavior: [depositRepair],
-                memory: {
-                    pickupStructure: "57ab15daddb24c075a4cced8",
-                    repairTargetTypes: "constructedWall"
-                }
-            },{
-                role: 'upgrader',
-                count: 1,
-                stats: [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
-                        WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE,MOVE],
-                pickupBehavior: pickupStructure,
-                depositBehavior: [depositController],
-                memory: {
-                    pickupStructure: "57ab15daddb24c075a4cced8",
-                }
-            },{
-                role: 'claimer_a',
-                count: 1,
-                respawnTime: 100,
-                stats: [CLAIM,MOVE,MOVE],
-                pickupBehavior: warClaimer,
-                memory: {
-                    pickupRoom: "W15N47"
-                }
-            },{
-                role: 'remote_miner_a',
-                count: 1,
-                stats: [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE],
-                pickupBehavior: pickupSource,
-                depositBehavior: [depositStationary],
-                // depositBehavior: [depositRepair,depositConstruction],
-                memory: {
-                    pickupRoom: "W15N47",
-                    pickupSource: "577b934b0f9d51615fa47ee3",
-                    // repairTargetTypes: "container,road"
-                }
-            },{
-                role: 'remote_hauler_a',
-                count: 1,
-                stats: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
-                        CARRY,CARRY,CARRY,CARRY,CARRY,WORK,MOVE,MOVE,MOVE,MOVE,
-                        MOVE,MOVE,MOVE,MOVE],
-                pickupBehavior: [pickupEnergy],
-                depositBehavior: [depositStructure],
-                memory: {
-                    pickupStructure: "579db3b82ce4a90f7cf6b51f",
-                    depositStructure: "57ab15daddb24c075a4cced8",
-                    pickupRoom: "W15N47",
-                    repairRoads:true
-
-                }
-            },{
-                role: 'remote_repairer_a',
-                count: 0,
-                stats: [CARRY,CARRY,CARRY,CARRY,WORK,MOVE,MOVE,MOVE],
-                pickupBehavior: [pickupEnergy],
-                depositBehavior: [depositRepair, depositConstruction, depositStructure],
-                memory: {
-                    pickupStructure: "579db3b82ce4a90f7cf6b51f",
-                    depositStructure: "57ab15daddb24c075a4cced8",
-                    pickupRoom: "W15N47",
-                    repairTargetTypes: "road",
-                    repairRoads:true
-                }
-            },{
-                role: 'remote_miner_hydro',
-                count: 0,//Game.getObjectById("57ab15daddb24c075a4cced8").store[RESOURCE_HYDROGEN] < 100000 ? 1 : 0,
-                stats: [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE],
-                pickupBehavior: pickupSource,
-                depositBehavior: [depositStationary],
-                memory: {
-                    pickupRoom: "W15N45",
-                    pickupSource: "577b9559e2e3e3f6319eb41e",
-                    resourceType: RESOURCE_HYDROGEN,
-                    brave: true,
-                }
-            },{
-                role: 'remote_hauler_hydro',
-                count: 0,//Game.getObjectById("57ab15daddb24c075a4cced8").store[RESOURCE_HYDROGEN] < 100000 ? 1 : 0,
-                stats: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,WORK,
-                        MOVE,MOVE,MOVE,MOVE,MOVE],
-                pickupBehavior: [pickupEnergy],
-                depositBehavior: [depositStructure],
-                memory: {
-                    pickupRoom: "W15N45",
-                    pickupStructure: "579db3b82ce4a90f7cf6b51f",
-                    depositStructure: "57ab15daddb24c075a4cced8",
-                    resourceType: RESOURCE_HYDROGEN,
-                    brave: true,
-                }
-            },{
-                role: 'remote_miner_k1',
-                count: 1,
-                stats: [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
-                        CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
-                pickupBehavior: pickupSource,
-                depositBehavior: [depositStationary],
-                memory: {
-                    pickupRoom: "W15N45",
-                    pickupSource: "577b934b0f9d51615fa47ef0",
-                    resourceType: RESOURCE_ENERGY,
-                    brave: true,
-                }
-            },{
-                role: 'remote_miner_k2',
-                count: 1,
-                stats: [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
-                        CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
-                pickupBehavior: pickupSource,
-                depositBehavior: [depositStationary],
-                memory: {
-                    pickupRoom: "W15N45",
-                    pickupSource: "577b934b0f9d51615fa47ef1",
-                    resourceType: RESOURCE_ENERGY,
-                    brave: true,
-                }
-            },{
-                role: 'remote_hauler_k2',
-                count: 8,
-                stats: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,WORK,
-                        CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,
-                        MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
-                pickupBehavior: [pickupEnergy],
-                depositBehavior: [depositStructure],
-                memory: {
-                    pickupRoom: "W15N45",
-                    pickupStructure: "579db3b82ce4a90f7cf6b51f",
-                    depositStructure: "57b52df12221d8ab76e32b70",
-                    resourceType: RESOURCE_ENERGY,
-                    repairRoads: true,
-                    brave: true,
-                }
-            },{
-                role: 'extra_upgrader',
-                count: 1,
-                stats: [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
-                        WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE,MOVE],
-                pickupBehavior: pickupStructure,
-                depositBehavior: [depositController],
-                memory: {
-                    pickupStructure: "57ab15daddb24c075a4cced8",
-                }
-            },{
-                role: 'extra_builder',
-                count: thisRoom.find(FIND_MY_CONSTRUCTION_SITES).length > 0 ? 1 : 0,
-                stats: [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
-                        CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,
-                        MOVE,MOVE,MOVE,MOVE],
-                pickupBehavior: pickupStructure,
-                depositBehavior: [depositConstruction],
-                memory: {
-                    pickupStructure: "57ab15daddb24c075a4cced8",
-                }
-            },{
                 role: 'obsolete',
                 count: 0,
                 stats: [MOVE],
@@ -287,6 +286,7 @@ room = {
             }
         ]
     }
-}
 
-module.exports = room;
+    // console.log("Third Room Setup: " + (Game.cpu.getUsed() - start) + " out of " + Game.cpu.limit);
+    return room;
+}

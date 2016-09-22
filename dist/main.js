@@ -3,12 +3,18 @@
 2. Mine Keeper Rooms more effectively
 3. Utilize Minerals better
 
+test
+
 */
-//Prototypes
+
+//Setting up some cool stuff here
 require('config.roles.builder')();
 require('util.creep')();
+require('util.cpu')();
 
-//Configuration imports
+CPU_PROFILING = true;
+
+//Room configurations
 var roomConfigurations = require('config.rooms');
 
 //Utilities
@@ -20,9 +26,13 @@ var navigator = require('util.navigator');
 // var roadBuilder = require('main.roadBuilder');
 // var roadConstructor = require('util.roadConstructor');
 
-var builder = require('config.roles.builder');
-
 module.exports.loop = function () {
+
+    for(var i in Memory.creeps) {
+        if(!Game.creeps[i]) {
+            delete Memory.creeps[i];
+        }
+    }    
     
     //Configurations
     var WALL_DEFENSE = 60000;
@@ -36,8 +46,9 @@ module.exports.loop = function () {
     var oLab = Game.getObjectById("57a4d1c69f073e5c05e22c6c")
     var zoLab = Game.getObjectById("57a59a89adf97d367f548e7e")
     
-    var roomMaps = roomConfigurations.rooms;
+    var roomMaps = roomConfigurations();
     
+    Memory["amountCache"] = {};
     var debugMessage = "";
     
     roomMaps.forEach(function(value, key, map) {
@@ -47,6 +58,7 @@ module.exports.loop = function () {
         var thisRoom = value["room"];
         var thisSpawn = value["spawn"];
         var creepProfile = value["creeps"];
+        var towerMinWallDefense = value["towerDefense"] ? value["towerDefense"] : WALL_DEFENSE;
         var troopCount = "";
         var canCreateTroops = true;
         
@@ -61,13 +73,13 @@ module.exports.loop = function () {
         //Tower Snippet
         var towers          = thisRoom.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_TOWER}});
         var healCreeps      = thisRoom.find(FIND_MY_CREEPS, {filter: function(creep) { return creep.hits < creep.hitsMax}});
-        var ramparts        = thisRoom.find(FIND_STRUCTURES, {filter: function(structure) { return ((structure.structureType == 'rampart') && structure.hits < WALL_DEFENSE);}}); 
+        var ramparts        = thisRoom.find(FIND_STRUCTURES, {filter: function(structure) { return ((structure.structureType == 'rampart') && structure.hits < towerMinWallDefense);}}); 
         var repairThese     = thisRoom.find(FIND_STRUCTURES, {filter: function(structure) { 
-                return  (structure.structureType == "constructedWall"   && structure.hits < WALL_DEFENSE) || 
-                        (structure.structureType == 'road'              && structure.hits < 1000) || 
+                return  (structure.structureType == "constructedWall"   && structure.hits < towerMinWallDefense) || 
+                        // (structure.structureType == 'road'              && structure.hits < 1000) || 
                         (structure.structureType == 'container'         && structure.hits < structure.hitsMax - towers.length*800);}});
         // console.log("there are " +repairThese.length + " things to repair!");
-        var hostiles        = thisRoom.find(FIND_HOSTILE_CREEPS, {filter: function(hostile) { return hostile.getActiveBodyparts(ATTACK) + hostile.getActiveBodyparts(WORK) + hostile.getActiveBodyparts(RANGED_ATTACK) + hostile.getActiveBodyparts(HEAL) > 0;}});
+        var hostiles        = thisRoom.find(FIND_HOSTILE_CREEPS, {filter: function(hostile) { return hostile.getActiveBodyparts(ATTACK) + hostile.getActiveBodyparts(WORK) + hostile.getActiveBodyparts(RANGED_ATTACK) /*+ hostile.getActiveBodyparts(HEAL)*/ > 0;}});
         if(hostiles.length > 0) {
             thisSpawn.memory.crisis = true;
             var username = hostiles[0].owner.username;
@@ -137,7 +149,7 @@ module.exports.loop = function () {
                 }
             }
 
-            if(healthyTroops.length < count && (!evacuating || record.memory.brave)) {
+            if(healthyTroops.length < count && (!evacuating || record.stats.indexOf(ATTACK) >= 0 || record.stats.indexOf(RANGED_ATTACK) >= 0 || record.stats.indexOf(HEAL) >= 0)) { //TODO just copy this class back over
                 if(canCreateTroops) {
                     spawns = thisRoom.find(FIND_MY_SPAWNS);
                     index = 0;
@@ -210,9 +222,9 @@ module.exports.loop = function () {
                         troop.memory.depositWaypointVisited = false;
                     }
                     
-                    if(!troop.memory.collecting && troop.carry.energy == 0) {
+                    if(!troop.memory.collecting && !troop.carry[troop.getResourceType()]) {
+                        // console.log(troop.name + " woof " + troop.carry[troop.getResourceType()] + troop.getResourceType());
                         troop.memory.collecting = true;
-                        troop.memory.depositWaypointVisited = false;
                     }
                     if(troop.memory.collecting && troop.carryCapacity == _.sum(troop.carry) && troop.getActiveBodyparts(CARRY) > 0) {
                         troop.memory.collecting = false;
@@ -221,10 +233,10 @@ module.exports.loop = function () {
                     try {
                        // console.log(troop.name);
                         if(troop.memory.collecting || !record.depositBehavior) {
-                            //Temporary
+                            //Not Temporary
                             troop.memory.depositWaypointVisited = false;
-                           // console.log("picking up")
-                           if(Array.isArray(record.pickupBehavior)) {
+                            // console.log("picking up")
+                            if(Array.isArray(record.pickupBehavior)) {
                                 startIndex = 0;
                                 while(record.pickupBehavior.length > startIndex && !record.pickupBehavior[startIndex].pickup(troop)) {
                                     startIndex ++;
@@ -234,6 +246,7 @@ module.exports.loop = function () {
                             }
                            // record.pickupBehavior.pickup(troop);
                         } else {
+                            troop.memory.pickupWaypointVisited = false;
                             if(Array.isArray(record.depositBehavior)) {
                                 startIndex = 0;
                                 while(record.depositBehavior.length > startIndex && !record.depositBehavior[startIndex].deposit(troop)) {
@@ -246,7 +259,7 @@ module.exports.loop = function () {
                            // console.log(troop.name + " performed " + record.depositBehavior[startIndex].name + " task!");
                         }
                     } catch (err) {
-                        console.log(troop.name + troop.pos + err);
+                        console.log(troop.name + troop.pos + err + Object.keys(err));
                     }
                     
                 } else {
@@ -285,11 +298,11 @@ module.exports.loop = function () {
                             hostile.getActiveBodyparts(HEAL) > 0
                         ).length > 0) {
                     //If creeps are designated as remote creeps, evacuate that room:
-                    if(troop.memory.pickupRoom != troop.memory.room || (troop.memory.brave && troop.hits < troop.hitsMax && troop.pos.roomName != troop.memory.room)) {
+                    if((!troop.memory.brave && troop.memory.pickupRoom != troop.memory.room) || (troop.memory.brave && troop.hits < troop.hitsMax && troop.pos.roomName != troop.memory.room)) {
                         evacuating = Memory["cached_rooms"][troop.pos.roomName].evacuating;
-                        // console.log("evacuate room " +troop.pos.roomName+"!");
-                        if(evacuating > Game.time) {
-                            console.log("evacuate room " + troop.pos.roomName + "!");
+                        console.log("evacuate room " +troop.pos.roomName+"!");
+                        if(evacuating == undefined || evacuating < Game.time) {
+                            console.log("evacuate room " + troop.pos.roomName + "!!!!");
                             var invader = troop.room.find(FIND_HOSTILE_CREEPS)[0];
                             troop.reportInvasion(invader);
                         }
@@ -303,7 +316,7 @@ module.exports.loop = function () {
                     (troop.memory.pickupRoom && Memory["cached_rooms"][troop.memory.pickupRoom].evacuating > Game.time)) {
                     //Evacuate!
                     troop.say("Scary!");
-                    if(troop.memory.role != 'obsolete' && troop.memory.pickupRoom && troop.memory.pickupRoom != troop.memory.room && (!troop.memory.brave || troop.hits < troop.hitsMax)) {
+                    if(troop.memory.role != 'obsolete' && troop.memory.pickupRoom && troop.memory.pickupRoom != troop.memory.room && (!troop.memory.brave || (troop.hits < troop.hitsMax && troop.getActiveBodyparts(ATTACK) + troop.getActiveBodyparts(RANGED_ATTACK) == 0))) {
                         troop.say("Too scary for me!");
                         troop.memory.oldrole = troop.memory.role;
                         troop.memory.role = 'obsolete';
@@ -323,19 +336,25 @@ module.exports.loop = function () {
         }
         
         if(Game.time % STATUS_REPORT_INTERVAL === 0 || Game.time % SHORT_REPORT_INTERVAL === 0) {
+            //Calculate room cost
             roomCost = energyManager.calculateForRecord(value);
-            debugMessage += thisName + " statistics: " + troopCount + "\n";
-            debugMessage += "   and has " + 
-                _.sum(thisRoom.find(FIND_MY_STRUCTURES, 
-                    {filter: (structure) => {return structure.structureType == 'extension' || structure.strutureType == 'spawn'}})
-                    .map((structure) => structure.energy)) +
-                    " energy available for creeps, out of " + 
-                    thisRoom.find(FIND_MY_STRUCTURES, 
-                    {filter: (structure) => {return structure.structureType == 'storage'}})
-                    .map((storage)=>storage.store.energy) +
-                    " available in storage \n" + 
-                    "   and will be using " + roomCost.roomCost + " energy a tick for various upkeep costs\n" +
-                    "\t-\t-\t-\t-\t-\t-\t-\n";
+            //Tabulate creeps present/missing
+            creepsPresent = _.filter(Game.creeps, (creep) => creep.memory.room == thisRoom.name && creep.ticksToLive != undefined).length;
+            creepsTotal = _.sum(_.map(creepProfile, (profile) => profile.count));
+
+            //Tabulate energy available
+            energyInSpawn = _.sum(thisRoom.find(FIND_MY_STRUCTURES, 
+                                {filter: (structure) => {return structure.structureType == 'extension' || structure.strutureType == 'spawn'}})
+                                .map((structure) => structure.energy));
+            energyInStorage = thisRoom.find(FIND_MY_STRUCTURES, 
+                                {filter: (structure) => {return structure.structureType == 'storage'}})
+                                .map((storage)=>storage.store.energy)
+
+            console.log("total creeps: " + creepsTotal);
+
+
+            debugMessage += thisName + ": " + creepsPresent + ":" + creepsTotal + " creeps\n" +
+                            "Sp: " + energyInSpawn + "\tSt: " + energyInStorage + "\tUp: " + roomCost.roomCost + "/t,\n\n";
         }
 
         } catch (err) {
@@ -361,8 +380,8 @@ module.exports.loop = function () {
                     "deposited  ",
                     "constructed",
                     "repaired   ",
-                    "towered    ",
-                    "linked     ",
+                    // "towered    ",
+                    // "linked     ",
                     // "containered"
                     ];
 
@@ -376,10 +395,33 @@ module.exports.loop = function () {
         Object.keys(Memory["cached_rooms"]).forEach(function(key){
             record = Memory["cached_rooms"][key];
 
-            //Print status report
-            roomReport += 
-                "\n" + key + "\t";
+            if(!record["stats"]){
+                record["stats"] = {
+                    "creep": {
+                        "harvested":      0,
+                        "dropped":        0,
+                        "scavenged":      0,
+                        "stored":         0,
+                        "creeped":       0,
+                        "deposited":      0,
+                        "constructed":    0,
+                        "repaired":       0,
+                        "towered":        0,
+                        "linked":         0,
+                        "containered":    0,
+                    },
 
+                    "tower": {
+                        "repaired":   0,
+                        "healed":     0,
+                        "attacked":   0,
+                    }
+                };
+            }
+
+            //Print status report
+            if(_.sum(record["stats"]["creep"]) > 0 ) {
+                roomReport += "\n" + key + "\t";
                 keys.forEach(function(key) {
                     var amount = record["stats"]["creep"][key.trim()]
                     if(amount > 0) {
@@ -394,6 +436,7 @@ module.exports.loop = function () {
                     // Clear out memory
                     record["stats"]["creep"][key.trim()] = 0;
                 })
+            }
 
             
         });

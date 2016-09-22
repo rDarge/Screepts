@@ -13,6 +13,15 @@ var pickupStructure = {
             console.log("Creep " + creep.name + " not properly configured to use pickupStructure behavior!");
             return ERR_INVALID_TARGET;
         }
+
+        //Transfer type logic:
+        resourceType = creep.getResourceType();
+
+        //Pickup energy you find by you
+        var maybeEnergy = _.filter(creep.room.lookForAt(LOOK_ENERGY, creep.pos), ((resource) => resource.resourceType == creep.getResourceType()));
+        if(maybeEnergy.length > 0) {
+            creep.pickup(maybeEnergy[0]);
+        }
         
         // creep.say('dero');
         
@@ -24,9 +33,6 @@ var pickupStructure = {
             creep.moveTo(new RoomPosition(25, 25, creep.memory.pickupRoom), {ignoreCreeps: false});
             return;
         }
-        
-        //Transfer type logic:
-        resourceType = creep.getResourceType();
         
         result = creep.pickup(creep.room.lookForAt(resourceType,structure.pos)[0]);
 

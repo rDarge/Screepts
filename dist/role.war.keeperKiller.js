@@ -16,7 +16,7 @@ var keeperKiller = {
             creep.say("attack!");
 
             hostiles = _.filter(creep.room.find(FIND_HOSTILE_CREEPS), 
-                {filter: (hostile) => {return creep.getDistanceTo(hostile) < 5;}})
+                {filter: (hostile) => {return creep.getDistanceTo(hostile) < 5 && (hostile.pos.roomName != 'W15N46');}})
                 .sort((a, b) => creep.getDistanceTo(a) - creep.getDistanceTo(b));
 
             if(hostiles.length > 0) {

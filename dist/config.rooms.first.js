@@ -1,4 +1,6 @@
 
+
+
 //Old roles
 var agent = require('role.agent');
 var obsolete = require('role.obsolete');
@@ -7,6 +9,8 @@ var obsolete = require('role.obsolete');
 var pickupSource = require('role.pickup.source');
 var pickupStructure = require('role.pickup.structure');
 var pickupEnergy = require('role.pickup.energy');
+
+// console.log("First Room Setup: " + (Game.cpu.getUsed() - start) + " out of " + Game.cpu.limit);
 
 var depositSpawn = require('role.deposit.spawn');
 var depositStructure = require('role.deposit.structure');
@@ -23,23 +27,30 @@ var warMurderer = require('role.war.murderer');
 var warKeeperScout = require('role.war.keeperScout');
 var warKeeperKiller = require('role.war.keeperKiller');
 
-//Labs
-var zLab = Game.getObjectById("57a404759c6ec19f1b0669b1")
-var oLab = Game.getObjectById("57a4d1c69f073e5c05e22c6c")
-var zoLab = Game.getObjectById("57a59a89adf97d367f548e7e")
-/*
- * Module code goes here. Use 'module.exports' to export things:
- * module.exports.thing = 'a thing';
- *
- * You can import it from another modules like this:
- * var mod = require('role.war.wallBreaker');
- * mod.thing == 'a thing'; // true
- */
- 
-room = {
-    configuration: {
+
+
+module.exports = function() {
+
+    // var start = Game.cpu.getUsed();
+
+    //Labs
+    var zLab = Game.getObjectById("57a404759c6ec19f1b0669b1")
+    var oLab = Game.getObjectById("57a4d1c69f073e5c05e22c6c")
+    var zoLab = Game.getObjectById("57a59a89adf97d367f548e7e")
+
+    var thisRoom = Game.rooms.W11N47;
+    var MINERAL = Game.getObjectById("577b954d4cfed28730762693");
+
+    var remoteRooms = ["W12N47"];
+    var roomCache = Memory["cached_rooms"];
+    var invadedRooms = remoteRooms.filter((roomName) => roomCache[roomName].evacuating > 0)
+    // console.log("Interim Cost: " + (Game.cpu.getUsed() - start) + " out of " + Game.cpu.limit);     // 9.9 cpu!!!! WTF
+
+    var droppedEnergy = thisRoom.find(FIND_DROPPED_ENERGY);
+
+    var room = {
         name: "Home Base",
-        room: Game.rooms.W11N47,
+        room: thisRoom,
         spawn: Game.spawns.Spawn1,
         chainSource: new RoomPosition(14,14,Game.rooms.W11N47.name),
         chainEnd: new RoomPosition(17,12,Game.rooms.W11N47.name),
@@ -87,38 +98,40 @@ room = {
                     pickupStructure: "579468d58e446dcf073c0c0d",
                     depositStructure: "5795b5033782a0b015dde292"
                 }
-            },{
-                role: 'tougherGuy',
-                count: 0,
-                stats: [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,
-                        TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,
-                        HEAL,HEAL,HEAL,HEAL,HEAL,HEAL,HEAL,HEAL,HEAL,HEAL,
-                        HEAL,HEAL,HEAL,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
-                        MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,], //1150 cost, 4500 health
-                pickupBehavior: warToughGuy,
-            },{
-                role: 'healer',
-                count: 0,
-                stats: [HEAL,HEAL,HEAL,HEAL,HEAL,HEAL,MOVE,MOVE,MOVE], //550 , 300 health :x
-                pickupBehavior: warHealer,
-                free: true
-            },{
-                role: 'wallBreaker',
-                count: 0,
-                stats: [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
-                        WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
-                        MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE], //2500, 500 destruction per tick, 2000 health
-                pickupBehavior: warWallBreaker,
-            },{
-                role: 'murderer',
-                count: 0,
-                stats: [TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
-                        MOVE, MOVE, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK], //970, 30 hits per tick, 1500 health
-                pickupBehavior: warMurderer,
-            },{
+            },
+
+            new CreepModel("reclaimer", [CARRY,CARRY,CARRY,CARRY,MOVE,MOVE])
+                .finds          (RESOURCE_ENERGY)
+                .andDeposits    ("579468d58e446dcf073c0c0d")
+                .butOnlyIf      (false),
+                
+            new CreepModel("zynthite", 
+                    [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
+                    CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                    MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
+                .harvests       (MINERAL.id,RESOURCE_ZYNTHIUM)
+                .andDeposits    ("579da066136f091c3105d014")
+                .butOnlyIf      (MINERAL.mineralAmount > 0),
+                
+            new CreepModel("towerTender", [CARRY,CARRY,CARRY,CARRY,MOVE,MOVE])
+                .picksUp        ("579468d58e446dcf073c0c0d")
+                .andDeposits    ("5795cb3e116c4f4e3065532e,57c711603c3e07216d6cbc0a,57dc945829f08f9e18f169d7,57904b0ec9d7b23451cc8204,57a8767e3b8988535aabe5f1,57c7c7f2d27a609276284c1a")
+                .butOnlyIf      (true),
+
+            new CreepModel("remote_miner_guard",
+                    [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,
+                     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,ATTACK,
+                     ATTACK,ATTACK,ATTACK,ATTACK])
+                .attacks        ()
+                .in             (invadedRooms[0])
+                .butOnlyIf      (invadedRooms.length > 0),
+                
+            {
                 role: 'wallFixer',
-                count: 1,
-                stats: [CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE],
+                count: 0,
+                stats: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                        WORK,WORK,WORK,WORK,WORK,MOVE,MOVE,MOVE,MOVE,MOVE,
+                        MOVE,MOVE,MOVE],
                 pickupBehavior: pickupStructure,
                 depositBehavior: [depositRepair],
                 memory: {
@@ -133,7 +146,7 @@ room = {
                 depositBehavior: [depositRepair],
                 memory: {
                     pickupStructure: "579468d58e446dcf073c0c0d",
-                    repairTargetTypes: "rampart,container,road"
+                    repairTargetTypes: "rampart,container"
                 }
             },{
                 role: 'roadFixer',
@@ -148,10 +161,12 @@ room = {
             },{
                 role: 'miner',
                 count: 1,
-                stats: [WORK,WORK,WORK,WORK,WORK,MOVE,MOVE,MOVE],
+                stats: [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE,MOVE],
                 pickupBehavior: pickupSource,
+                depositBehavior: depositStructure,
                 memory: {
-                    pickupSource: "577b93560f9d51615fa48019"
+                    pickupSource: "577b93560f9d51615fa48019",
+                    depositStructure: "57c711603c3e07216d6cbc0a,57b467993164911b77a5379b"
                 }
             },{
                 role: 'upgradeHauler',
@@ -166,7 +181,7 @@ room = {
             },{
                 role: 'linkTender',
                 count: 1,
-                stats: [CARRY,MOVE],
+                stats: [CARRY,CARRY,MOVE],
                 pickupBehavior: pickupStructure,
                 depositBehavior: [depositStructure],
                 memory:{
@@ -177,7 +192,8 @@ room = {
                 role: 'upgraderAndTowerFeeder',
                 count: 1,
                 stats: [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
-                        WORK,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
+                        WORK,WORK,WORK,WORK,WORK,CARRY,
+                        MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
                 pickupBehavior: pickupStructure,
                 depositBehavior: [depositStructure, depositController],
                 memory: {
@@ -186,26 +202,14 @@ room = {
                 }
             },{
                 role: 'builder',
-                count: 1,
+                count: 0,
                 stats: [WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,
-                        CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
+                        CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
                 pickupBehavior: [pickupStructure],
-                depositBehavior: [depositConstruction],
+                depositBehavior: [depositConstruction,depositController],
                 memory: {
                     pickupStructure: "579468d58e446dcf073c0c0d",
                 }
-            },{
-                role: 'agent',
-                count: 0,
-                stats: [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,
-                        TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,
-                        MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
-                        MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
-                        ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,
-                        HEAL,HEAL],
-                action: agent,
-                crisis: agent,
-                free: true
             },{
                 role: 'claimer',
                 count: 1,//1 //_.filter(Game.structures, (structure) => structure.structureType == 'controller') < 3 ? 1 : 0
@@ -264,19 +268,6 @@ room = {
                     resourceType: RESOURCE_ENERGY,
                 }
             },{
-                role: 'explorer',
-                count: 0,
-                stats: [CARRY,CARRY, WORK, WORK, MOVE, MOVE, MOVE, MOVE],
-                pickupBehavior: [pickupEnergy],
-                depositBehavior: [depositConstruction, depositRepair],
-                memory: {
-                    pickupStructure: "579cf3040a5eed39634cc3da",
-                    pickupRoom: "W12N47",
-                    depositRoom: "W12N47",
-                    repairTargetTypes: "road",
-                    repairRoads: true
-                }
-            },{
                 role: 'remote_miner_a',
                 count: 1,
                 stats: [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE],
@@ -296,40 +287,38 @@ room = {
                     pickupSource: "577b93530f9d51615fa47fd7",
                     pickupRoom: "W12N47",
                 }
-            },{
-                role: 'remote_hauler_a',
-                count: 2,
-                stats: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+            },
+
+            new CreepModel("remote_hauler_a",
+                        [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
                         CARRY,CARRY,CARRY,CARRY,CARRY,WORK,MOVE,MOVE,MOVE,MOVE,
-                        MOVE,MOVE,MOVE,MOVE],
-                pickupBehavior: [pickupEnergy],
-                depositBehavior: [depositStructure],
-                memory: {
-                    pickupStructure: "579cf3040a5eed39634cc3da",
-                    depositStructure: "579be2c31ef25b9102e6acf6",
-                    pickupRoom: "W12N47",
-                    repairRoads:true
-                }
-            },{
-                role: 'upgrader',
-                count: 0,
-                stats: [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
-                        WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
-                        CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE],
-                pickupBehavior: pickupStructure,
-                depositBehavior: [depositController],
-                memory: {
-                    depositStructure: "5795cb3e116c4f4e3065532e",
-                    pickupStructure: "579468d58e446dcf073c0c0d"
-                }
-            },{
+                        MOVE,MOVE,MOVE,MOVE])
+                .finds(RESOURCE_ENERGY)
+                .in("W2N47")
+                .andDeposits("57c7c3f695dbe4fb62e607be,579be2c31ef25b9102e6acf6")
+                .withFriends(2), 
+
+            new CreepModel("deliveryMan", 
+                    [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                     CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                     CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,
+                     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
+                     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,])
+                .picksUp        ("579468d58e446dcf073c0c0d")
+                .in             ("W11N47")
+                .andDeposits    ("57d52c282a95196b4fb63f12")
+                .in             ("W12N48")
+                .withFriends    (2)
+                .butOnlyIf      (true),
+
+            {
                 role: 'obsolete',
                 count: 0,
                 stats: [MOVE],
                 action: obsolete
             }
         ] //End of Home Base Creeps
-    }
-}
+    };
 
-module.exports = room;
+    return room;
+}

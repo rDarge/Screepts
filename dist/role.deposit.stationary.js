@@ -14,7 +14,7 @@ var depositStationary = {
         var container = creep.room.lookForAt(LOOK_CONSTRUCTION_SITES,creep.pos);
 
         //Either build a container for yourself
-        if(container.length > 0) {
+        if(container.length > 0 && creep.carry[RESOURCE_ENERGY] > 0) {
             creep.buildAndReport(Game.getObjectById(container[0].id));
         } else {
             container = creep.room.lookForAt(LOOK_STRUCTURES,creep.pos)
@@ -24,7 +24,7 @@ var depositStationary = {
             
             //Or try and repair it if it's busted
             var resourceType = creep.getResourceType();
-            if(container && container.hits < container.hitsMax) {
+            if(container && container.hits < container.hitsMax && creep.carry[RESOURCE_ENERGY] > 0) {
                 result = creep.repairAndReport(container);
             } else {
                 //Otherwise deposit your LOOT

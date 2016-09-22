@@ -12,10 +12,10 @@ toughGuy = {
         
         if(creep.memory.fighting && creep.hits < 3000) {
             creep.memory.fighting = false;
-	    }
-	    if(!creep.memory.fighting && creep.hitsMax == creep.hits) {
-	        creep.memory.fighting = true;
-	    }
+        }
+        if(!creep.memory.fighting && creep.hitsMax == creep.hits) {
+            creep.memory.fighting = true;
+        }
         
         if(creep.memory.fighting && creep.pos.roomName == Game.flags.entrypoint.pos.roomName) {
             var breakThisWall = creep.room.lookForAt(LOOK_STRUCTURES, Game.flags.entrypoint);

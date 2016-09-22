@@ -32,9 +32,9 @@ module.exports = function() {
             } else {
             	var maybeConstruction = this.room.lookForAt(LOOK_CONSTRUCTION_SITES, this.pos);
 	            // console.log("Maybe a road " + maybeRoad);
-	            if(maybeRoad.length > 0 && maybeRoad[0].structureType == 'road' && maybeRoad[0].hits < maybeRoad[0].hitsMax){
+	            if(maybeConstruction.length > 0){
 	                this.say("tink!");
-	                this.buildAndReport(maybeRoad[0]);
+	                this.buildAndReport(maybeConstruction[0]);
 	            }
             }
         }
@@ -121,12 +121,13 @@ module.exports = function() {
 
 		//Notify via email the amount harvested
 		harvestedSoFar = this.getReportValue("harvested_keeper_count");
-		Game.notify("There was " + harvestedSoFar + " harvested before an invasion occured!");
+		Game.notify("There was " + harvestedSoFar + " harvested before an invasion occured in " + this.pos.roomName + "!");
 		this.clearReportValue("harvested_keeper_count");
 	}
 
-	Creep.prototype.reportAllClear = function(invader) {
+	Creep.prototype.reportAllClear = function() {
 		//Set the evacuation time
+		// console.log("derp");
 		Memory["cached_rooms"][this.pos.roomName].evacuating = false;
 	}
 

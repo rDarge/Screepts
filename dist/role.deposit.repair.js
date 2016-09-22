@@ -2,10 +2,15 @@
  * Return true if you did this operation
  */
  
-var wallHits = 350000;
+var wallHits = 4000000;
 
 var depositRepair = {
     deposit: function(creep) {
+        
+        if(creep.memory.wallHits) {
+            wallHits = creep.memory.wallHits;
+        }
+        
         if(!creep.memory.repairTargetTypes){
             console.log("Creep " + creep.name + " not configured to repair any types, but is using depositRepair behavior!");
             return ERR_INVALID_TARGET;
@@ -30,7 +35,8 @@ var depositRepair = {
                          (structure.structureType == 'rampart' && structure.hits < wallHits) ||
                          (structure.structureType == 'road' && structure.hits < structure.hitsMax) ||
                          (structure.structureType == 'container' && structure.hits < structure.hitsMax));
-            }}).sort((a, b) => creep.getDistanceTo(a) - creep.getDistanceTo(b));
+                         //TODO this sort is busted
+            }}).sort((a, b) => creep.getDistanceTo(a) - creep.getDistanceTo(b) /*(Math.round(a.hits/5000)*5000/Math.min(a.hitsMax,wallHits)*100.0) - (Math.round(b.hits/5000)*5000/Math.min(a.hitsMax,wallHits)*100.0)*/);
             // console.log(targetTypes[index] + targets.length);
             index = index + 1;
         }

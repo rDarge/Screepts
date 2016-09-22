@@ -12,10 +12,10 @@ murderer = {
         
         if(creep.memory.fighting && creep.hits < 2000) {
             creep.memory.fighting = false;
-	    }
-	    if(!creep.memory.fighting && creep.hitsMax == creep.hits) {
-	        creep.memory.fighting = true;
-	    }
+        }
+        if(!creep.memory.fighting && creep.hitsMax == creep.hits) {
+            creep.memory.fighting = true;
+        }
         
         if(creep.memory.fighting && creep.pos.roomName == Game.flags.trenches.pos.roomName) {
             
