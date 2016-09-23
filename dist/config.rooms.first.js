@@ -112,6 +112,13 @@ module.exports = function() {
                 .harvests       (MINERAL.id,RESOURCE_ZYNTHIUM)
                 .andDeposits    ("579da066136f091c3105d014")
                 .butOnlyIf      (MINERAL.mineralAmount > 0),
+
+            new CreepModel("z_helper",
+                    [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                    CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                    MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
+                .picksUp("579da066136f091c3105d014", RESOURCE_ZYNTHIUM)
+                .andDeposits("579468d58e446dcf073c0c0d"),
                 
             new CreepModel("towerTender", [CARRY,CARRY,CARRY,CARRY,MOVE,MOVE])
                 .picksUp        ("579468d58e446dcf073c0c0d")
@@ -294,7 +301,7 @@ module.exports = function() {
                         CARRY,CARRY,CARRY,CARRY,CARRY,WORK,MOVE,MOVE,MOVE,MOVE,
                         MOVE,MOVE,MOVE,MOVE])
                 .finds(RESOURCE_ENERGY)
-                .in("W2N47")
+                .in("W12N47")
                 .andDeposits("57c7c3f695dbe4fb62e607be,579be2c31ef25b9102e6acf6")
                 .withFriends(2), 
 
@@ -309,7 +316,7 @@ module.exports = function() {
                 .andDeposits    ("57d52c282a95196b4fb63f12")
                 .in             ("W12N48")
                 .withFriends    (2)
-                .butOnlyIf      (true),
+                .butOnlyIf      (false),
 
             {
                 role: 'obsolete',

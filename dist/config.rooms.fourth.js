@@ -149,6 +149,14 @@ module.exports = function() {
                 .picksUp        (STORAGE)
                 .andRepairsUpTo ("road"),
 
+            new CreepModel("rampartFixer", 
+                    [CARRY,CARRY,
+                     WORK,WORK,
+                     MOVE,MOVE])
+                .picksUp        (STORAGE)
+                .andRepairs     ("rampart")
+                .andWorships    (),
+
             new CreepModel("builder", 
                     [WORK,WORK,WORK,WORK,WORK,
                     CARRY,CARRY,CARRY,CARRY,CARRY,

@@ -80,11 +80,17 @@ module.exports = function() {
                 .picksUp        (STORAGE)
                 .andRepairs     ("road"),
                 
-            new CreepModel("rampartFixer", [CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE])
+            new CreepModel("rampartFixer", 
+                    [CARRY,CARRY,CARRY,CARRY,CARRY,
+                     WORK,WORK,WORK,WORK,WORK,
+                     MOVE,MOVE,MOVE,MOVE,MOVE])
                 .picksUp        (STORAGE)
                 .andRepairs     ("rampart"),
                 
-            new CreepModel("wallFixer", [CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE])
+            new CreepModel("wallFixer", 
+                    [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                     WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
+                     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
                 .picksUp        (STORAGE)
                 .andRepairs     ("constructedWall"),
 
@@ -201,8 +207,8 @@ module.exports = function() {
                 .in             ("W14N47")
                 .andDeposits    ("57d4e809c4e0422217650d62")
                 .in             ("W14N48")
-                .withFriends    (2)
-                .butOnlyIf      (false),
+                .withFriends    (4)
+                .butOnlyIf      (true),
                 
 
             new CreepModel("remote_hauler_a", 

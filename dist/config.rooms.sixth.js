@@ -37,18 +37,20 @@ module.exports = function() {
             //Disabled until higher level
             new CreepModel("closeHarvester", [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE])
                 .harvests       ("577b935a0f9d51615fa48067")
-                .andDropsIt     ()
+                .andDeposits    ("57e23c0e442039155ee51f0b")
                 .butOnlyIf      (true),
 
+            //Disabled after second link
             new CreepModel("closeHauler", [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,WORK,MOVE,MOVE,MOVE,MOVE])
                 .picksUp        ("57d82456b2318b5c3c0459c2")
-                .andDeposits    (STORAGE),
+                .andDeposits    (STORAGE)
+                .butOnlyIf      (false),
                 
             new CreepModel("nurse", [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,WORK,MOVE,MOVE,
                                      MOVE,MOVE])
                 .picksUp        (STORAGE)
                 .andNurses      ()
-                .andDeposits    ("57d855a060d071276ac0952a,57dac39a1571a4377067a7bd")
+                .andDeposits    ("57d855a060d071276ac0952a,57e491d75d43d8735863d620")
                 .withFriends    (1),
                 
             new CreepModel("farHarvester", [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE])
@@ -68,8 +70,8 @@ module.exports = function() {
                 
             new CreepModel("towerTender", [CARRY,CARRY,CARRY,CARRY,MOVE,MOVE])
                 .picksUp        (STORAGE)
-                .andDeposits    ("57d855a060d071276ac0952a,57dac39a1571a4377067a7bd")
-                .butOnlyIf      (false),
+                .andDeposits    ("57d855a060d071276ac0952a,57e491d75d43d8735863d620")
+                .butOnlyIf      (true),
                 
             new CreepModel("leonin", 
                 [WORK,WORK,WORK,WORK,WORK,
@@ -99,15 +101,63 @@ module.exports = function() {
                     MOVE,MOVE,MOVE,MOVE,MOVE])
                 .picksUp        (STORAGE)
                 .andBuilds      ()
+                .in             ("W8N49")
                 .butOnlyIf      (THIS_ROOM.find(FIND_MY_CONSTRUCTION_SITES).length > 0),
 
             new CreepModel("upgrader", 
-                    [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,/*WORK,WORK,
-                     /*WORK,WORK,WORK,WORK,WORK,*/CARRY,CARRY,CARRY,CARRY,CARRY,
-                    MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,/*MOVE,MOVE,MOVE*/])
+                    [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
+                     WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,
+                    MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
                 .picksUp        (STORAGE)
                 .andWorships    ()
-                .withFriends    (1),
+                .withFriends    (2),
+
+            new CreepModel("claimer_1", [MOVE,CLAIM])
+                .claims         ()
+                .in             ("W8N49"),
+
+            new CreepModel("remote_harvester_1", [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE])
+                .harvests       ("577b935d0f9d51615fa480aa")
+                .in             ("W8N49")
+                .andDropsIt     (),
+
+            new CreepModel("remote_harvester_2", [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE])
+                .harvests       ("577b935d0f9d51615fa480a9")
+                .in             ("W8N49")
+                .andDropsIt     (),
+
+            new CreepModel("remote_hauler_1",
+                        [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                        CARRY,CARRY,CARRY,CARRY,CARRY,WORK,MOVE,MOVE,MOVE,MOVE,
+                        MOVE,MOVE,MOVE,MOVE])
+                .finds(RESOURCE_ENERGY)
+                .in("W8N49")
+                .andDeposits(STORAGE)
+                .withFriends(2), 
+
+            new CreepModel("claimer_2", [MOVE,CLAIM])
+                .claims         ()
+                .in             ("W8N48"),
+
+            new CreepModel("remote_harvester_3", [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE])
+                .harvests       ("577b935d0f9d51615fa480ad")
+                .in             ("W8N48")
+                .andDropsIt     (),
+
+            new CreepModel("remote_harvester_4", [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE])
+                .harvests       ("577b935d0f9d51615fa480af")
+                .in             ("W8N48")
+                .andDropsIt     (),
+
+            new CreepModel("remote_hauler_2",
+                        [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                        CARRY,CARRY,CARRY,CARRY,CARRY,WORK,MOVE,MOVE,MOVE,MOVE,
+                        MOVE,MOVE,MOVE,MOVE])
+                .finds(RESOURCE_ENERGY)
+                .in("W8N48")
+                .andDeposits(STORAGE)
+                .withFriends(2), 
+
             
             //Here for legacy purposes
             {

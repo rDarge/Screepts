@@ -67,9 +67,9 @@ module.exports = function() {
                 .butOnlyIf      (1),
                 
             new CreepModel("hydroclast", 
-                [WORK,WORK,WORK,WORK,WORK,
-                CARRY,CARRY,CARRY,CARRY,CARRY,
-                MOVE,MOVE,MOVE,MOVE,MOVE])
+                [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
+                 CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                 MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
                 .harvests       (MINERAL.id,RESOURCE_HYDROGEN)
                 .andDeposits    (STORAGE)
                 .butOnlyIf      (MINERAL.mineralAmount > 0),
@@ -101,6 +101,14 @@ module.exports = function() {
             new CreepModel("wallFixer", [CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE])
                 .picksUp        (STORAGE)
                 .andRepairsUpTo ("constructedWall",10000)
+                .andWorships    (),
+
+            new CreepModel("rampartFixer", 
+                    [CARRY,CARRY,
+                     WORK,WORK,
+                     MOVE,MOVE])
+                .picksUp        (STORAGE)
+                .andRepairs     ("rampart")
                 .andWorships    (),
 
             new CreepModel("builder", 
