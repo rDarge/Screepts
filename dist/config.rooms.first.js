@@ -1,6 +1,3 @@
-
-
-
 //Old roles
 var agent = require('role.agent');
 var obsolete = require('role.obsolete');

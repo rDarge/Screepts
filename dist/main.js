@@ -8,9 +8,10 @@ test
 */
 
 //Setting up some cool stuff here
-require('config.roles.builder')();
-require('util.creep')();
 require('util.cpu')();
+require('util.creep')();
+require('config.roles.creepBuilder')();
+require('config.roles.roomBuilder')();
 require('util.roomManagement')();
 
 CPU_PROFILING = false;
@@ -23,7 +24,6 @@ var energyManager = require('util.energyManager');
 var keeperHarvesterUtil = require('util.keeperHarvester');
 
 //Deprecated
-var navigator = require('util.navigator');
 // var roadBuilder = require('main.roadBuilder');
 // var roadConstructor = require('util.roadConstructor');
 

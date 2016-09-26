@@ -14,6 +14,12 @@ var depositConstruction = {
             return false; 
         }
 
+        var targetTypes = false;
+        if(creep.memory.constructionTargetTypes) {
+            targetTypes = creep.memory.constructionTargetTypes.split(",");
+        }
+
+
         //ABSTRACT THIS
         creep.tryToRepairRoads();
         
@@ -36,7 +42,9 @@ var depositConstruction = {
             }
 
             //Otherwise do work!
-            var targets = creep.room.find(FIND_MY_CONSTRUCTION_SITES).sort((a, b) => creep.getDistanceTo(a) - creep.getDistanceTo(b));
+            var targets = creep.room.find(FIND_MY_CONSTRUCTION_SITES)
+                .filter((site) => targetTypes ? targetTypes.indexOf(site.structureType) >= 0 : true)
+                .sort((a, b) => creep.getDistanceTo(a) - creep.getDistanceTo(b));
             if(targets.length > 0) {
                 // console.log("There are " + targets.length + " things to build in room "+creep.room.name+"!");
                 creep.say(creep.getDistanceTo(targets[0]));

@@ -86,9 +86,10 @@ module.exports = function() {
             //     .andDeposits    ("57ab15daddb24c075a4cced8")
             //     .butOnlyIf      (true),//_.sum(droppedEnergy.map((energy) => energy.amount)) > 500 ? 1 : 0),
 
-            // new CreepModel("roadFixer", [CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE])
-            //     .picksUp        ("57ab15daddb24c075a4cced8")
-            //     .andRepairs     ("rampart,road"),
+            new CreepModel("roadFixer", [CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE])
+                .picksUp        (STORAGE)
+                .andBuilds      ("road")
+                .andRepairs     ("rampart,road"),
 
             new CreepModel("wallFixer", [CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE])
                 .picksUp        (STORAGE)
@@ -100,9 +101,10 @@ module.exports = function() {
                     CARRY,CARRY,CARRY,CARRY,CARRY,
                     MOVE,MOVE,MOVE,MOVE,MOVE])
                 .picksUp        (STORAGE)
+                .in             ("W9N49")
                 .andBuilds      ()
-                .in             ("W8N49")
-                .butOnlyIf      (THIS_ROOM.find(FIND_MY_CONSTRUCTION_SITES).length > 0),
+                .in             ("W8N48"),
+                //.butOnlyIf      (Game.rooms.W8N49.find(FIND_MY_CONSTRUCTION_SITES).length > 0),
 
             new CreepModel("upgrader", 
                     [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,

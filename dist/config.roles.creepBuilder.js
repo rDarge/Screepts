@@ -23,6 +23,9 @@ var warKeeperScout = require('role.war.keeperScout');
 var warKeeperKiller = require('role.war.keeperKiller');
 var warRemoteGuard = require('role.war.remoteGuard');
 
+var labPickup = require('role.lab.pickup');
+var labDeposit = require('role.lab.deposit');
+
 module.exports = function() {
 
 	CreepModel = function CreepModel(name, stats) {
@@ -34,6 +37,13 @@ module.exports = function() {
 		this.memory = {};
 		this.memory.repairRoads = true;
 	};
+
+	LabTender = function LabTender(name, stats, priority, labs) {
+		CreepModel.call(this, name, stats);
+		this.pickupBehavior = [labPickup];
+		this.depositBehavior = [labDeposit];
+	}
+	LabTender.prototype = new CreepModel();
 
 	CreepModel.prototype.setResourceType = function(resourceType) {
 		if(resourceType == undefined) {
@@ -118,20 +128,20 @@ module.exports = function() {
 		return this;
 	}
 
-	CreepModel.prototype.andRepairs = function(types) {
+	CreepModel.prototype.andRepairs = function(types, maxHits) {
 		this.depositBehavior.push(depositRepair);
 		this.memory.repairTargetTypes = types;
+		if(maxHits) {
+			this.memory.wallHits = maxHits;
+		}
 		return this;
 	}
-	
-	CreepModel.prototype.andRepairsUpTo = function(types, maxHits) {
-	    this.andRepairs(types)
-	    this.memory.wallHits = maxHits;
-	    return this;
-	}
 
-	CreepModel.prototype.andBuilds = function(){
+	CreepModel.prototype.andBuilds = function(types){
 		this.depositBehavior.push(depositConstruction);
+		if(types) { 
+			this.memory.constructionTargetTypes = types;
+		}
 		return this;
 	}
 

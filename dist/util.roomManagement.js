@@ -1,17 +1,24 @@
 module.exports = function() {
 
+    invaderWhiteList = ['Azfaloth', 'Remco'];
 
-	updateLinks = function(thisRoom, mainLink) {		
-		var depositToThisLink = Game.getObjectById(mainLink);
+    findHostiles = function(hostile) { 
+        return hostile.getActiveBodyparts(ATTACK) + hostile.getActiveBodyparts(WORK) + hostile.getActiveBodyparts(RANGED_ATTACK) /*+ hostile.getActiveBodyparts(HEAL)*/ > 0
+                && invaderWhiteList.indexOf(hostile.owner) == -1;
+    }
+
+
+    updateLinks = function(thisRoom, mainLink) {        
+        var depositToThisLink = Game.getObjectById(mainLink);
         var links = thisRoom.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_LINK}});
         links.forEach(link => { link.transferEnergy(depositToThisLink)});
-	}
+    }
 
 
-	var TOWER_SAFETY_BUFFFER = 500;
+    var TOWER_SAFETY_BUFFFER = 500;
 
-	updateTowers = function(thisRoom, thisSpawn, towerMinWallDefense) {
-		var towers          = thisRoom.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_TOWER}});
+    updateTowers = function(thisRoom, thisSpawn, towerMinWallDefense) {
+        var towers          = thisRoom.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_TOWER}});
         var healCreeps      = thisRoom.find(FIND_MY_CREEPS, {filter: function(creep) { return creep.hits < creep.hitsMax}});
         var ramparts        = thisRoom.find(FIND_STRUCTURES, {filter: function(structure) { return ((structure.structureType == 'rampart') && structure.hits < towerMinWallDefense);}}); 
         var repairThese     = thisRoom.find(FIND_STRUCTURES, {filter: function(structure) { 
@@ -19,7 +26,7 @@ module.exports = function() {
                         // (structure.structureType == 'road'              && structure.hits < 1000) || 
                         (structure.structureType == 'container'         && structure.hits < structure.hitsMax - towers.length*800);}});
         // console.log("there are " +repairThese.length + " things to repair!");
-        var hostiles        = thisRoom.find(FIND_HOSTILE_CREEPS, {filter: function(hostile) { return hostile.getActiveBodyparts(ATTACK) + hostile.getActiveBodyparts(WORK) + hostile.getActiveBodyparts(RANGED_ATTACK) /*+ hostile.getActiveBodyparts(HEAL)*/ > 0;}});
+        var hostiles        = thisRoom.find(FIND_HOSTILE_CREEPS, {filter: findHostiles});
 
         if(hostiles.length > 0) {
             thisSpawn.memory.crisis = true;
@@ -51,16 +58,16 @@ module.exports = function() {
                 });
             } 
         }
-	}
+    }
 
-	var CREEP_DEATH_BUFFER = 100;
+    var CREEP_DEATH_BUFFER = 100;
 
-	updateCreeps = function(thisRoom, thisSpawn, creepProfile) {
+    updateCreeps = function(thisRoom, thisSpawn, creepProfile) {
 
-		var canCreateTroops = true;
-		var troopCount = "";
+        var canCreateTroops = true;
+        var troopCount = "";
 
-		//Do creep actions
+        //Do creep actions
         creepProfile.forEach(function(record, index, collection) {
             
             var troops = _.filter(Game.creeps, (creep) => creep.memory.role == record.role && creep.memory.room == thisRoom.name);
@@ -215,7 +222,7 @@ module.exports = function() {
                     //old
                     if(!record.free && troop.room.name != thisRoom.name) {
                         // console.log(troop.name + " is lost in " + troop.pos);
-                        navigator.run(troop, thisRoom)
+                        troop.moveTo(new RoomPosition(24, 24, thisRoom.name));
                     } else {
                         record.action.run(troop);
                     }
@@ -245,6 +252,7 @@ module.exports = function() {
                             hostile.getActiveBodyparts(WORK) + 
                             hostile.getActiveBodyparts(RANGED_ATTACK) + 
                             hostile.getActiveBodyparts(HEAL) > 0
+                            && hostile.owner != 'Azfaloth'
                         ).length > 0) {
                     //If creeps are designated as remote creeps, evacuate that room:
                     if((!troop.memory.brave && troop.memory.pickupRoom != troop.memory.room) || (troop.memory.brave && troop.hits < troop.hitsMax && troop.pos.roomName != troop.memory.room)) {
@@ -281,15 +289,15 @@ module.exports = function() {
             }); //End of troop loop
         });
 
-		return troopCount;
-	}
+        return troopCount;
+    }
 
-	var SHORT_REPORT_INTERVAL = 20;
-	var STATUS_REPORT_INTERVAL = 450;
-	roomStatusReport = function(thisRoom, thisName, troopCount, value, creepProfile) { 
-		var debugMessage = "";
+    var SHORT_REPORT_INTERVAL = 20;
+    var STATUS_REPORT_INTERVAL = 450;
+    roomStatusReport = function(thisRoom, thisName, troopCount, value, creepProfile) { 
+        var debugMessage = "";
 
-		if(Game.time % STATUS_REPORT_INTERVAL === 0 || Game.time % SHORT_REPORT_INTERVAL === 0) {
+        if(Game.time % STATUS_REPORT_INTERVAL === 0 || Game.time % SHORT_REPORT_INTERVAL === 0) {
             if(troopCount == "") {
                 troopCount = " All creeps present and accounted for.";
             }
@@ -316,6 +324,6 @@ module.exports = function() {
         }
 
         return debugMessage;
-	}
+    }
 
 }

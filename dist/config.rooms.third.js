@@ -32,7 +32,7 @@ module.exports = function() {
                             Local Creeps
             ---------------------------------------------*/
             new CreepModel("backupHauler", [CARRY,CARRY,MOVE])
-                .picksUp        (STORAGE)
+                .picksUp        ("57adf862d4089220049deb82")
                 .andNurses      ()
                 .butOnlyIf      (THIS_ROOM.find(FIND_MY_CREEPS).length < 5),
 
@@ -85,21 +85,23 @@ module.exports = function() {
                      WORK,WORK,WORK,WORK,WORK,
                      MOVE,MOVE,MOVE,MOVE,MOVE])
                 .picksUp        (STORAGE)
-                .andRepairs     ("rampart"),
+                .andRepairs     ("rampart")
+                .butOnlyIf      (Game.getObjectById(STORAGE).store[RESOURCE_ENERGY] > 100000),
                 
             new CreepModel("wallFixer", 
                     [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
                      WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
                      MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
                 .picksUp        (STORAGE)
-                .andRepairs     ("constructedWall"),
+                .andRepairs     ("constructedWall", 1000000)
+                .butOnlyIf      (Game.getObjectById(STORAGE).store[RESOURCE_ENERGY] > 100000),
 
             new CreepModel("upgrader", 
                     [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
                      WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE,MOVE])
                 .picksUp        (STORAGE)
                 .andWorships    ()
-                .withFriends    (1),
+                .butOnlyIf      (Game.getObjectById(STORAGE).store[RESOURCE_ENERGY] > 100000),
                 
             new CreepModel("extra_builder", 
                     [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
@@ -207,8 +209,8 @@ module.exports = function() {
                 .in             ("W14N47")
                 .andDeposits    ("57d4e809c4e0422217650d62")
                 .in             ("W14N48")
-                .withFriends    (4)
-                .butOnlyIf      (true),
+                .withFriends    (1)
+                .butOnlyIf      (false),
                 
 
             new CreepModel("remote_hauler_a", 

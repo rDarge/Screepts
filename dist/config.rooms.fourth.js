@@ -78,7 +78,7 @@ module.exports = function() {
                 .harvests       (CLOSE_SOURCE)
                 .andNurses      ()
                 .andDeposits    (STORAGE)
-                .butOnlyIf      (true),
+                .butOnlyIf      (false),
 
             //Disabled until higher level
             new CreepModel("closeHarvester", [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE])
@@ -142,12 +142,12 @@ module.exports = function() {
 
             new CreepModel("wallFixer", [CARRY,CARRY,CARRY,CARRY,WORK,WORK,MOVE,MOVE,MOVE])
                 .picksUp        (STORAGE)
-                .andRepairsUpTo ("constructedWall",1000000)
+                .andRepairs     ("constructedWall",1000000)
                 .butOnlyIf(false),
                 
             new CreepModel("roadFixer", [CARRY,CARRY,WORK,WORK,MOVE,MOVE])
                 .picksUp        (STORAGE)
-                .andRepairsUpTo ("road"),
+                .andRepairs     ("road"),
 
             new CreepModel("rampartFixer", 
                     [CARRY,CARRY,
@@ -172,7 +172,7 @@ module.exports = function() {
                      MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
                 .picksUp        (STORAGE)
                 .andWorships    ()
-                .withFriends    (2),
+                .withFriends    (1),
             
             //Here for legacy purposes
             {

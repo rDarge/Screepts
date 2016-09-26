@@ -77,7 +77,7 @@ module.exports = function() {
                     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
                     MOVE,MOVE,MOVE,MOVE,MOVE])
                 .picksUp("579b0acaf2aeb6f4028edc20")
-                .andRepairsUpTo("constructedWall",10000000)
+                .andRepairs    ("constructedWall",15000000)
                 .andNurses()
                 .withFriends(1),
                 
@@ -90,7 +90,7 @@ module.exports = function() {
                      WORK,WORK,WORK,WORK,WORK,
                      MOVE,MOVE,MOVE,MOVE,MOVE])
                 .picksUp("579b0acaf2aeb6f4028edc20")
-                .andRepairsUpTo("rampart",7000000),
+                .andRepairs    ("rampart",10000000),
 
             /*-------------------------------------------
                             Defense Team
@@ -137,7 +137,7 @@ module.exports = function() {
                     [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
                     CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
                     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
-                .harvests       (MINERAL.id,RESOURCE_UTRIUM)
+                .harvests       (MINERAL.id,RESOURCE_OXYGEN)
                 .andDeposits    ("579b0acaf2aeb6f4028edc20")
                 .butOnlyIf      (MINERAL.mineralAmount > 0),
 
@@ -173,6 +173,32 @@ module.exports = function() {
             /*----------------------------------------------
                             Remote Creeps
             ----------------------------------------------*/
+
+            new CreepModel ('claimer_rip', [CLAIM,MOVE])
+                .claims()
+                .in("W13N43")
+                .butOnlyIf(false),
+
+            new CreepModel("remote_miner_Z", [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE])
+                .harvests("577b93510f9d51615fa47fa4")
+                .in("W13N43")
+                .andDropsIt(),
+
+            new CreepModel("remote_miner_Z2", [WORK,WORK,WORK,WORK,WORK,CARRY,MOVE,MOVE,MOVE])
+                .harvests("577b93510f9d51615fa47fa3")
+                .in("W13N43")
+                .andDropsIt(),
+
+            new CreepModel("zbuilder", 
+                    [WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,
+                     CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
+                .finds(RESOURCE_ENERGY)
+                .in("W13N43")
+                .andBuilds()
+                .andWorships()
+                .in("W13N43")
+                .withFriends(4),
 
             //W13N47----------------------------------------
 
@@ -227,7 +253,7 @@ module.exports = function() {
                      MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE])
                 .finds(RESOURCE_ENERGY)
                 .in("W12N45")
-                .andDeposits("57c1abfc37084c8f4b0614d8")
+                .andDeposits("57e802051c1a6cdf44884a6f")
                 .in("W12N46"),
                 
             new CreepModel("claimer_g", [CLAIM,MOVE])
@@ -255,7 +281,7 @@ module.exports = function() {
                 .finds(RESOURCE_ENERGY)
                 .in("W11N45")
                 .andBuilds()
-                .andDeposits("57c1abfc37084c8f4b0614d8")
+                .andDeposits("57e802051c1a6cdf44884a6f")
                 .in("W12N46")
                 .via("Sloth"),
               

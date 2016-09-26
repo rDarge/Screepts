@@ -1,5 +1,13 @@
 module.exports = function() {
 
+	wrap = function(label, delegate) {
+        try {
+            delegate();
+        } catch (ex) {
+            console.log(label + " " + ex);
+        }
+    }
+
 	printUsage = function(label, delegate) {
 		if(CPU_PROFILING) {
 			var start = Game.cpu.getUsed();
